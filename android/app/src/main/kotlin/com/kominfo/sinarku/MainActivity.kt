@@ -1,4 +1,4 @@
-package com.example.sinarku
+package com.kominfo.sinarku
 
 import io.flutter.embedding.android.FlutterActivity
 
