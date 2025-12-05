@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 
+import '../modules/forgotpassword/bindings/forgotpassword_binding.dart';
+import '../modules/forgotpassword/views/forgotpassword_view.dart';
 import '../modules/home/bindings/home_binding.dart';
 import '../modules/home/profile/bindings/profile_binding.dart';
 import '../modules/home/profile/profile_kontributor/bindings/profile_kontributor_binding.dart';
@@ -18,6 +20,8 @@ import '../modules/home/toponim/views/toponim_view.dart';
 import '../modules/home/views/home_view.dart';
 import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
+import '../modules/signup/bindings/signup_binding.dart';
+import '../modules/signup/views/signup_view.dart';
 import '../modules/splash/bindings/splash_binding.dart';
 import '../modules/splash/views/splash_view.dart';
 
@@ -82,6 +86,16 @@ class AppPages {
       name: _Paths.LOGIN,
       page: () => const LoginView(),
       binding: LoginBinding(),
+    ),
+    GetPage(
+      name: _Paths.FORGOTPASSWORD,
+      page: () => const ForgotpasswordView(),
+      binding: ForgotpasswordBinding(),
+    ),
+    GetPage(
+      name: _Paths.SIGNUP,
+      page: () => const SignupView(),
+      binding: SignupBinding(),
     ),
   ];
 }

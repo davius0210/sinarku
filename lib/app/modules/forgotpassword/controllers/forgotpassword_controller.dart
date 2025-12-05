@@ -1,15 +1,12 @@
 import 'package:get/get.dart';
-import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
-class HomeController extends GetxController {
-  //TODO: Implement HomeController
+class ForgotpasswordController extends GetxController {
+  //TODO: Implement ForgotpasswordController
 
   final count = 0.obs;
-  late PersistentTabController tabController;
   @override
   void onInit() {
     super.onInit();
-    tabController = PersistentTabController(initialIndex: 0);
   }
 
   @override
