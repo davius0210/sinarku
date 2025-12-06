@@ -7,4 +7,5 @@ class ColorsHelper {
   static const Color blue = Color(0xFF4CB3CF);
   static const Color border = Color(0xFFE0E0E0);
   static const Color hint = Color(0xFF828282);
+  static const Color disable = Color(0xFF828282);
 }

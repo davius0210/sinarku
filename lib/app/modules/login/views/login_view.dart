@@ -20,93 +20,95 @@ class LoginView extends GetView<LoginController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView(
-              padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-              children: [
-                Image(
-                  image: AssetImage('assets/images/sinarku-logo-color.png'),
-                  height: MediaQuery.of(context).size.width / 1.5,
-                ),
-                SizedBox(height: 10),
-                CustomTextComponent(
-                  hint: 'Email/Username',
-                  icon: Icon(CupertinoIcons.person, color: ColorsHelper.hint),
-                  keyboardType: TextInputType.emailAddress,
-                ),
-                SizedBox(height: 10),
-                CustomTextComponent(
-                  hint: 'Password',
-                  isPassword: true,
-                  icon: Icon(CupertinoIcons.lock, color: ColorsHelper.hint),
-                  keyboardType: TextInputType.text,
-                ),
-                SizedBox(height: 10),
-                CustomButtonComponent(
-                  title: 'Masuk',
-                  icon: Icon(Icons.login, color: Colors.white),
-                  onPressed: () async {
-                    //await Future.delayed(Duration(seconds: 10));
-                    Get.toNamed('/home');
-                  },
-                ),
-                SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('Lupa kata kunci?'),
-                    TextButton(
-                      onPressed: () {
-                        Get.toNamed('/forgotpassword');
-                      },
-                      child: Text(
-                        'Klik Disini',
-                        style: TextStyle(color: ColorsHelper.blue),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                children: [
+                  Image(
+                    image: AssetImage('assets/images/sinarku-logo-color.png'),
+                    height: MediaQuery.of(context).size.width / 1.5,
+                  ),
+                  SizedBox(height: 10),
+                  CustomTextComponent(
+                    hint: 'Email/Username',
+                    icon: Icon(CupertinoIcons.person, color: ColorsHelper.hint),
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  SizedBox(height: 10),
+                  CustomTextComponent(
+                    hint: 'Password',
+                    isPassword: true,
+                    icon: Icon(CupertinoIcons.lock, color: ColorsHelper.hint),
+                    keyboardType: TextInputType.text,
+                  ),
+                  SizedBox(height: 10),
+                  CustomButtonComponent(
+                    title: 'Masuk',
+                    icon: Icon(Icons.login, color: Colors.white),
+                    onPressed: () async {
+                      //await Future.delayed(Duration(seconds: 10));
+                      Get.toNamed('/home');
+                    },
+                  ),
+                  SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Lupa kata kunci?'),
+                      TextButton(
+                        onPressed: () {
+                          Get.toNamed('/forgotpassword');
+                        },
+                        child: Text(
+                          'Klik Disini',
+                          style: TextStyle(color: ColorsHelper.blue),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
 
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Tidak Punya Akun?'),
-                    TextButton(
-                      onPressed: () {
-                        Get.toNamed('/signup');
-                      },
-                      child: Text(
-                        'Daftar Akun',
-                        style: TextStyle(color: ColorsHelper.blue),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Tidak Punya Akun?'),
+                      TextButton(
+                        onPressed: () {
+                          Get.toNamed('/signup');
+                        },
+                        child: Text(
+                          'Daftar Akun',
+                          style: TextStyle(color: ColorsHelper.blue),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                LabeledDivider(label: 'ATAU'),
-                SocialMediaButton(
-                  ButtonsSocialMedia.Apple,
-                  text: "Masuk dengan Apple",
-                  onPressed: () {},
-                ),
-                SizedBox(height: 10),
-                SocialMediaButton(
-                  ButtonsSocialMedia.Google,
-                  text: "Masuk dengan Google",
-                  onPressed: () {},
-                ),
-                SizedBox(height: 10),
-                SocialMediaButton(
-                  ButtonsSocialMedia.WhatsApp,
-                  text: "Masuk dengan Whatsapp",
-                  onPressed: () {},
-                ),
-              ],
+                    ],
+                  ),
+                  LabeledDivider(label: 'ATAU'),
+                  SocialMediaButton(
+                    ButtonsSocialMedia.Apple,
+                    text: "Masuk dengan Apple",
+                    onPressed: () {},
+                  ),
+                  SizedBox(height: 10),
+                  SocialMediaButton(
+                    ButtonsSocialMedia.Google,
+                    text: "Masuk dengan Google",
+                    onPressed: () {},
+                  ),
+                  SizedBox(height: 10),
+                  SocialMediaButton(
+                    ButtonsSocialMedia.WhatsApp,
+                    text: "Masuk dengan Whatsapp",
+                    onPressed: () {},
+                  ),
+                ],
+              ),
             ),
-          ),
-          LabelSyaratdanketentuanComponent(),
-        ],
+            LabelSyaratdanketentuanComponent(),
+          ],
+        ),
       ),
     );
   }

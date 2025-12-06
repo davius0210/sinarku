@@ -1,7 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:get/get.dart';
-import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
+import 'package:persistent_bottom_nav_bar_v2/persistent_bottom_nav_bar_v2.dart';
+import 'package:sinarku/components/custom_middle_navbar_component.dart';
 import 'package:sinarku/helper/colors_helper.dart';
 
 import '../controllers/home_controller.dart';
@@ -13,28 +16,69 @@ class HomeView extends GetView<HomeController> {
     return Scaffold(
       appBar: AppBar(title: const Text('HomeView'), centerTitle: true),
       body: PersistentTabView(
-        context,
         controller: controller.tabController,
-        screens: _buildScreens(),
-        items: _navBarItems(),
-        backgroundColor: ColorsHelper.primary,
-        handleAndroidBackButtonPress: true,
-        resizeToAvoidBottomInset: true,
-        stateManagement: true,
-        padding: EdgeInsets.only(top: 5, bottom: 5),
-        decoration: NavBarDecoration(
-          gradient: LinearGradient(
-            colors: [ColorsHelper.primary, ColorsHelper.blue],
-            begin: Alignment.bottomCenter,
-            end: Alignment.topCenter,
+        tabs: [
+          PersistentTabConfig(
+            screen: Text('Pengaturan'),
+            item: ItemConfig(
+              icon: Icon(CupertinoIcons.gear, color: Colors.white),
+              inactiveIcon: Icon(CupertinoIcons.gear, color: Colors.white),
+              title: "Pengaturan",
+              activeForegroundColor: Colors.white,
+            ),
           ),
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(10),
-            topRight: Radius.circular(10),
+          PersistentTabConfig(
+            screen: Text('Daftar Data'),
+            item: ItemConfig(
+              icon: Icon(CupertinoIcons.list_bullet, color: Colors.white),
+              inactiveIcon: Icon(
+                CupertinoIcons.list_bullet,
+                color: Colors.white,
+              ),
+              title: "Daftar Data",
+              activeForegroundColor: Colors.white,
+            ),
           ),
-          colorBehindNavBar: Colors.white,
-        ),
-        navBarStyle: NavBarStyle.style15,
+          PersistentTabConfig(
+            screen: Text('Maps'),
+            item: ItemConfig(
+              icon: Icon(FontAwesomeIcons.mapPin),
+              title: "Rekam Toponim",
+            ),
+          ),
+          PersistentTabConfig(
+            screen: Text('Rekam Jejak'),
+            item: ItemConfig(
+              icon: Icon(Icons.directions_walk, color: Colors.white),
+              title: "Rekam Jejak",
+              inactiveIcon: Icon(Icons.directions_walk),
+            ),
+          ),
+          PersistentTabConfig(
+            screen: Text('Saya'),
+            item: ItemConfig(
+              icon: Icon(Icons.person, color: Colors.white),
+              title: "Saya",
+              inactiveIcon: Icon(Icons.person),
+            ),
+          ),
+        ],
+        navBarBuilder: (NavBarConfig navBarConfig) {
+          return CustomBottomNavBar(
+            navBarConfig: navBarConfig,
+            navBarDecoration: NavBarDecoration(
+              color: ColorsHelper.primary,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            onPressMiddle: () async {
+              print('wwwwpw');
+              controller.tabController.jumpToTab(2);
+            },
+          );
+        },
       ),
     );
   }
@@ -46,44 +90,6 @@ class HomeView extends GetView<HomeController> {
       const Center(child: Text("Profile Screen")),
       const Center(child: Text("Profile Screen")),
       const Center(child: Text("Profile Screen")),
-    ];
-  }
-
-  List<PersistentBottomNavBarItem> _navBarItems() {
-    return [
-      PersistentBottomNavBarItem(
-        icon: const Icon(Icons.settings),
-        title: "Pengaturan",
-        activeColorPrimary: Colors.white,
-        inactiveColorPrimary: Colors.grey,
-      ),
-      PersistentBottomNavBarItem(
-        icon: const Icon(Icons.data_array),
-        title: "Daftar Data",
-        activeColorPrimary: Colors.white,
-        inactiveColorPrimary: Colors.grey,
-      ),
-      PersistentBottomNavBarItem(
-        icon: const Icon(Icons.add_location, color: Colors.white),
-        title: "Rekam Toponim",
-        onPressed: (context) {
-          controller.tabController.jumpToTab(2);
-        },
-        activeColorPrimary: ColorsHelper.blue,
-        inactiveColorPrimary: Colors.grey,
-      ),
-      PersistentBottomNavBarItem(
-        icon: const Icon(Icons.history),
-        title: "Rekam Jejak",
-        activeColorPrimary: Colors.white,
-        inactiveColorPrimary: Colors.grey,
-      ),
-      PersistentBottomNavBarItem(
-        icon: const Icon(Icons.person),
-        title: "Saya",
-        activeColorPrimary: Colors.white,
-        inactiveColorPrimary: Colors.grey,
-      ),
     ];
   }
 }
