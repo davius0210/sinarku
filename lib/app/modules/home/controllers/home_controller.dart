@@ -6,6 +6,7 @@ class HomeController extends GetxController {
 
   final count = 0.obs;
   late PersistentTabController tabController;
+  var selectedBasemap = ''.obs;
   @override
   void onInit() {
     super.onInit();

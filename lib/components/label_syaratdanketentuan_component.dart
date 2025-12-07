@@ -9,7 +9,7 @@ class LabelSyaratdanketentuanComponent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+      padding: EdgeInsets.fromLTRB(20, 20, 20, 40),
       child: RichText(
         text: TextSpan(
           children: [

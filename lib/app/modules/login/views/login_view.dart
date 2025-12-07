@@ -49,8 +49,8 @@ class LoginView extends GetView<LoginController> {
                     title: 'Masuk',
                     icon: Icon(Icons.login, color: Colors.white),
                     onPressed: () async {
-                      //await Future.delayed(Duration(seconds: 10));
-                      Get.toNamed('/home');
+                      await Future.delayed(Duration(seconds: 3));
+                      Get.offAllNamed('/home');
                     },
                   ),
                   SizedBox(height: 10),

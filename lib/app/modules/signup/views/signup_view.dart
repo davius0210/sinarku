@@ -16,7 +16,7 @@ class SignupView extends GetView<SignupController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(title: Text('Daftar Akun')),
       body: Column(
         children: [
           Expanded(

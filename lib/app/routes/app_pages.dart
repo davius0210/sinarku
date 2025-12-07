@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import '../modules/forgotpassword/bindings/forgotpassword_binding.dart';
 import '../modules/forgotpassword/views/forgotpassword_view.dart';
 import '../modules/home/bindings/home_binding.dart';
+import '../modules/home/mapscreen/bindings/mapscreen_binding.dart';
+import '../modules/home/mapscreen/views/mapscreen_view.dart';
 import '../modules/home/profile/bindings/profile_binding.dart';
 import '../modules/home/profile/profile_kontributor/bindings/profile_kontributor_binding.dart';
 import '../modules/home/profile/profile_kontributor/views/profile_kontributor_view.dart';
@@ -74,6 +76,11 @@ class AppPages {
               binding: ProfileKontributorBinding(),
             ),
           ],
+        ),
+        GetPage(
+          name: _Paths.MAPSCREEN,
+          page: () => const MapscreenView(),
+          binding: MapscreenBinding(),
         ),
       ],
     ),

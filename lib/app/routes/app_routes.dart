@@ -17,6 +17,7 @@ abstract class Routes {
       _Paths.HOME + _Paths.PROFILE + _Paths.PROFILE_KONTRIBUTOR;
   static const FORGOTPASSWORD = _Paths.FORGOTPASSWORD;
   static const SIGNUP = _Paths.SIGNUP;
+  static const MAPSCREEN = _Paths.HOME + _Paths.MAPSCREEN;
 }
 
 abstract class _Paths {
@@ -33,4 +34,5 @@ abstract class _Paths {
   static const PROFILE_KONTRIBUTOR = '/profile-kontributor';
   static const FORGOTPASSWORD = '/forgotpassword';
   static const SIGNUP = '/signup';
+  static const MAPSCREEN = '/mapscreen';
 }

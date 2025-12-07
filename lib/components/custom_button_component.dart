@@ -2,15 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:sinarku/helper/colors_helper.dart';
 
 class CustomButtonComponent extends StatefulWidget {
-  final Future<void> Function()? onPressed;
-  final String title;
+  final Function()? onPressed;
+  final String? title;
   final Widget? icon;
+  final BorderRadius? borderRadius;
+  final double? width;
+  final Gradient? gradient; // New optional gradient
+  final Color? color; // New optional color
 
   const CustomButtonComponent({
-    super.key, 
-    this.icon, 
-    this.onPressed, 
-    required this.title
+    super.key,
+    this.icon,
+    this.onPressed,
+    this.title,
+    this.borderRadius,
+    this.width,
+    this.gradient, // Add to constructor
+    this.color, // Add to constructor
   });
 
   @override
@@ -36,24 +44,35 @@ class _CustomButtonComponentState extends State<CustomButtonComponent> {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: widget.onPressed == null ? null : handleClick,
-      borderRadius: BorderRadius.circular(10),
-      child: Ink(
-        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: widget.onPressed == null ? Colors.grey : ColorsHelper.primary,
-        ),
-        child: SizedBox(
-          height: 22, // biar stabil, tidak berubah
-          child: Center(
+    return Container(
+      width: widget.width ?? null,
+      child: Material(
+        borderRadius: widget.borderRadius ?? BorderRadius.circular(10),
+        child: InkWell(
+          onTap: widget.onPressed == null ? null : handleClick,
+          borderRadius: widget.borderRadius ?? BorderRadius.circular(10),
+          child: Ink(
+            padding: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              borderRadius: widget.borderRadius ?? BorderRadius.circular(10),
+              gradient: widget.onPressed == null
+                  ? null
+                  : (widget.gradient ??
+                        LinearGradient(
+                          colors: [ColorsHelper.blue, ColorsHelper.primary],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        )),
+              color: widget.onPressed == null
+                  ? Colors.grey
+                  : (widget.color ?? null), // Use widget.color if provided
+            ),
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 250),
               child: isLoading
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
+                  ? Container(
+                      height: 24,
+                      width: 24,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
                         color: Colors.white,
@@ -65,12 +84,13 @@ class _CustomButtonComponentState extends State<CustomButtonComponent> {
                       children: [
                         if (widget.icon != null) ...[
                           widget.icon!,
-                          const SizedBox(width: 8),
+                          if (widget.title != null) const SizedBox(width: 8),
                         ],
-                        Text(
-                          widget.title,
-                          style: const TextStyle(color: Colors.white),
-                        ),
+                        if (widget.title != null)
+                          Text(
+                            widget.title!,
+                            style: const TextStyle(color: Colors.white),
+                          ),
                       ],
                     ),
             ),

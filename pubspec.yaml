@@ -40,6 +40,9 @@ dependencies:
   flutter_signin_button: ^2.1.1
   font_awesome_flutter: ^10.9.1
   persistent_bottom_nav_bar_v2: ^6.2.0
+  flutter_map: ^8.2.2
+  latlong2: ^0.9.1
+  file_picker: ^10.3.7
 
 dev_dependencies:
   flutter_test:

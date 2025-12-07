@@ -15,7 +15,17 @@ void main() {
       theme: ThemeData(
         fontFamily: 'Inter',
         scaffoldBackgroundColor: Colors.white,
-        primaryColorLight: ColorsHelper.primary
+        primaryColorLight: ColorsHelper.primary,
+        primaryColor: ColorsHelper.blue,
+        appBarTheme: AppBarTheme(
+          backgroundColor: ColorsHelper.primary,
+          titleTextStyle: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
       ),
     ),
   );
