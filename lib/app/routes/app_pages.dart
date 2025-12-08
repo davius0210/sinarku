@@ -19,6 +19,8 @@ import '../modules/home/syncdata/bindings/syncdata_binding.dart';
 import '../modules/home/syncdata/views/syncdata_view.dart';
 import '../modules/home/toponim/bindings/toponim_binding.dart';
 import '../modules/home/toponim/views/toponim_view.dart';
+import '../modules/home/unduh_basemap/bindings/unduh_basemap_binding.dart';
+import '../modules/home/unduh_basemap/views/unduh_basemap_view.dart';
 import '../modules/home/views/home_view.dart';
 import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
@@ -81,6 +83,11 @@ class AppPages {
           name: _Paths.MAPSCREEN,
           page: () => const MapscreenView(),
           binding: MapscreenBinding(),
+        ),
+        GetPage(
+          name: _Paths.UNDUH_BASEMAP,
+          page: () => const UnduhBasemapView(),
+          binding: UnduhBasemapBinding(),
         ),
       ],
     ),

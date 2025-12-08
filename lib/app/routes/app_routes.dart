@@ -18,6 +18,7 @@ abstract class Routes {
   static const FORGOTPASSWORD = _Paths.FORGOTPASSWORD;
   static const SIGNUP = _Paths.SIGNUP;
   static const MAPSCREEN = _Paths.HOME + _Paths.MAPSCREEN;
+  static const UNDUH_BASEMAP = _Paths.HOME + _Paths.UNDUH_BASEMAP;
 }
 
 abstract class _Paths {
@@ -35,4 +36,5 @@ abstract class _Paths {
   static const FORGOTPASSWORD = '/forgotpassword';
   static const SIGNUP = '/signup';
   static const MAPSCREEN = '/mapscreen';
+  static const UNDUH_BASEMAP = '/unduh-basemap';
 }

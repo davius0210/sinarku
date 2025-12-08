@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -65,13 +66,26 @@ class HomeView extends GetView<HomeController> {
             width: double.infinity,
             height: double.infinity,
             child: FlutterMap(
-              mapController: MapController(),
-              options: MapOptions(),
+              mapController: controller.mapController,
+              options: MapOptions(
+                onMapEvent: (event){
+                  HapticFeedback.lightImpact();
+                  if (event is MapEventMoveEnd && controller.isRekamToponim.value) {
+                    final center = controller.mapController.camera.center;
+                    controller.currentCenter.value = center;
+                    controller.fetchLocationInfo(center);
+                  }
+                },
+                onPositionChanged: (position, hasGesture) {
+                  
+                },
+              ),
               children: [
                 TileLayer(
-                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  urlTemplate: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
                   maxZoom: 18,
                 ),
+                
                 MarkerLayer(
                   markers: [
                     Marker(
@@ -81,6 +95,7 @@ class HomeView extends GetView<HomeController> {
                       child: const FlutterLogo(),
                     ),
                   ],
+                  
                 ),
               ],
             ),
@@ -144,7 +159,7 @@ class HomeView extends GetView<HomeController> {
                   Expanded(
                     child: GestureDetector(
                       onTap: () {
-                        Get.toNamed(Routes.REKAMJEJAK);
+                        Get.toNamed(Routes.UNDUH_BASEMAP);
                       },
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -190,7 +205,9 @@ class HomeView extends GetView<HomeController> {
                   child: Material(
                     borderRadius: BorderRadius.circular(50),
                     child: InkWell(
-                      onTap: () {},
+                      onTap: () {
+                        controller.isRekamToponim.value = !controller.isRekamToponim.value;
+                      },
                       borderRadius: BorderRadius.circular(50),
                       child: Ink(
                         height: 60,
@@ -485,6 +502,17 @@ class HomeView extends GetView<HomeController> {
               onPressed: () {},
             ),
           ),
+          Obx(()=>(controller.isRekamToponim.value) ? Align(alignment: Alignment.center,child: Icon(FontAwesomeIcons.mapPin, color: Colors.amberAccent,size: 44,),) : SizedBox.shrink()),
+          
+          Obx(()=>(controller.isRekamToponim.value) ? Positioned(
+            top: -260,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: infoPopup(), // lihat fungsi di bawah
+            ),
+          ) : SizedBox.shrink())
         ],
       ),
     );
@@ -499,4 +527,58 @@ class HomeView extends GetView<HomeController> {
       const Center(child: Text("Profile Screen")),
     ];
   }
+  Widget infoPopup() {
+  return Obx(() {
+    if (controller.currentCenter.value == null) return const SizedBox();
+
+    return Container(
+      padding: const EdgeInsets.all(8),
+      width: 230,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 5)],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Koordinat: "
+            "${controller.currentCenter.value!.latitude.toStringAsFixed(6)}, "
+            "${controller.currentCenter.value!.longitude.toStringAsFixed(6)}",
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 6),
+
+          // 🔄 Jika loading alamat
+          if (controller.isLoadingAddress.value)
+            const Center(
+                child: Padding(
+              padding: EdgeInsets.all(4),
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )),
+
+          // 📍 Menampilkan alamat jika sudah ada
+          if (controller.address.value != null &&
+              !controller.isLoadingAddress.value) ...[
+            Text("Provinsi: ${controller.address.value!.provinsi ?? '-'}"),
+            Text("Kota/Kab: ${controller.address.value!.kota ?? '-'}"),
+            Text("Kec: ${controller.address.value!.kecamatan ?? '-'}"),
+            Text("Kel/Desa: ${controller.address.value!.kelurahan ?? '-'}"),
+          ],
+
+          const SizedBox(height: 6),
+          CustomButtonComponent(
+            width: double.infinity,
+            onPressed: () {
+              Get.toNamed(Routes.TOPONIM);
+            },
+            title: 'Lengkapi Data',
+          )
+        ],
+      ),
+    );
+  });
+}
 }

@@ -71,8 +71,8 @@ class _CustomButtonComponentState extends State<CustomButtonComponent> {
               duration: const Duration(milliseconds: 250),
               child: isLoading
                   ? Container(
-                      height: 24,
-                      width: 24,
+                      height: 20,
+                      width: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
                         color: Colors.white,
