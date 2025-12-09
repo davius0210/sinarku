@@ -1,0 +1,76 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+import 'package:sinarku/helper/colors_helper.dart';
+
+class CustomEmptyWidget extends StatelessWidget {
+  final Widget? child;
+  final String title;
+  final String? subtitle;
+  final bool? availableButton;
+  final String? titleButton;
+  final Function()? onPress;
+  const CustomEmptyWidget({
+    super.key,
+    this.child,
+    required this.title,
+    this.subtitle,
+    this.availableButton = false,
+    this.onPress,
+    this.titleButton,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        child ?? Image.asset('assets/images/empty.png', height: 50),
+        SizedBox(height: 10),
+        Text(
+          '$title',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            color: Colors.black,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        subtitle != null
+            ? Column(
+                children: [
+                  SizedBox(height: 5),
+                  Text(
+                    subtitle!,
+                    style: TextStyle(fontSize: 13, color: ColorsHelper.hint),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              )
+            : SizedBox(),
+        availableButton == true
+            ? Column(
+                children: [
+                  SizedBox(height: 20),
+                  GestureDetector(
+                    onTap: onPress,
+                    child: Padding(
+                      padding: EdgeInsets.all(10),
+                      child: Text(
+                        titleButton!,
+                        style: TextStyle(
+                          color: ColorsHelper.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            : SizedBox(),
+      ],
+    );
+  }
+}

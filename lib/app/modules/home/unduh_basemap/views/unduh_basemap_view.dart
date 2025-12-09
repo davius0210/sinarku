@@ -1,141 +1,174 @@
-import 'dart:math';
-
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:sinarku/models/map_item_model.dart';
+import 'package:sinarku/app/modules/home/unduh_basemap/controllers/unduh_basemap_controller.dart';
+import 'package:sinarku/components/custom_button_component.dart';
+import 'package:sinarku/helper/colors_helper.dart';
 
-import '../controllers/unduh_basemap_controller.dart';
-
+// Menggunakan GetView<T> agar dapat mengakses controller secara langsung
 class UnduhBasemapView extends GetView<UnduhBasemapController> {
   const UnduhBasemapView({super.key});
+
   @override
   Widget build(BuildContext context) {
+    // Controller diakses langsung melalui properti 'controller'
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Peta Batas Daerah"),
-        backgroundColor: Colors.blueGrey,
-        actions: [
-          _modeButton(Icons.touch_app, "cursor"),
-          _modeButton(Icons.crop_square, "rect"),
-        ],
-      ),
+      appBar: AppBar(title: Text('Unduh Batas')),
       body: Stack(
         children: [
-          _mapWidget(context),
-          Obx(() => controller.isDragging.value ? _dragPreview() : const SizedBox()),
-        ],
-      ),
-    );
-  }
-
-  /// BUTTON SELECT MODE
-  Widget _modeButton(IconData icon, String mode) {
-    return Obx(() {
-      final active = controller.selectionMode.value == mode;
-      return IconButton(
-        icon: Icon(icon, color: active ? Colors.yellowAccent : Colors.white),
-        onPressed: () => controller.selectionMode.value = mode,
-      );
-    });
-  }
-
-  /// MAP WIDGET
-  Widget _mapWidget(BuildContext context) {
-    return Listener(
-      onPointerDown: (e) {
-        if (controller.selectionMode.value == "rect") {
-          final pos = _tapToLatLng(context, e.localPosition);
-          controller.startRect(pos);
-        }
-      },
-      onPointerMove: (e) {
-        if (controller.selectionMode.value == "rect") {
-          final pos = _tapToLatLng(context, e.localPosition);
-          controller.updateRect(pos);
-        }
-      },
-      onPointerUp: (_) {
-        if (controller.selectionMode.value == "rect") {
-          controller.finishRect();
-        }
-      },
-      child: FlutterMap(
-        options: MapOptions(
-          initialCenter: LatLng(-6.2, 106.8),
-          initialZoom: 5.0,
-          onTap: (tapPosition, latLng) {
-            if (controller.selectionMode.value == "cursor") _selectByCursor(latLng);
-          },
-        ),
-        children: [
-          TileLayer(
-            urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+          Expanded(
+            child: FlutterMap(
+              children: [
+                TileLayer(
+                  urlTemplate:
+                      'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+                  maxZoom: 18,
+                ),
+                Obx(() => PolygonLayer(polygons: controller.polygons.value)),
+              ],
+              options: MapOptions(
+                initialCenter: LatLng(-6.2088, 106.8456),
+                onMapEvent: (event) {
+                  if (event is MapEventTap) {
+                    if (controller.editButton.value) {
+                      controller.addPolygon(event.tapPosition);
+                    } else if (controller.editButtonRectangle.value) {
+                      controller.addRectangle(event.tapPosition);
+                    }
+                  }
+                },
+              ),
+            ),
           ),
-          GetBuilder<UnduhBasemapController>(
-            builder: (_) => PolygonLayer(
-              polygons: controller.geojsonData.map((f) {
-                final id = f["properties"]["id"].toString();
-                final isSelected = controller.selectedRegions.contains(id);
-                final coords = f["geometry"]["coordinates"][0] as List;
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              margin: EdgeInsets.all(10),
+              width: double.infinity,
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: ColorsHelper.third,
+                border: Border.all(color: ColorsHelper.border),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Obx(
+                          () => CustomButtonComponent(
+                            gradient: controller.editButton.value
+                                ? ColorsHelper.warningGradient
+                                : LinearGradient(
+                                    colors: [
+                                      ColorsHelper.buttonGrey,
+                                      ColorsHelper.buttonGreyDark,
+                                    ],
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                  ),
+                            onPressed: () {
+                              if (controller.editButton.value) {
+                                controller.saveNewPolygonDrawing();
+                              } else {
+                                controller.startNewPolygonDrawing();
+                              }
+                            },
+                            icon: Icon(
+                              FontAwesomeIcons.drawPolygon,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 10),
+                        Obx(
+                          () => CustomButtonComponent(
+                            gradient: controller.editButtonRectangle.value
+                                ? ColorsHelper.warningGradient
+                                : LinearGradient(
+                                    colors: [
+                                      ColorsHelper.buttonGrey,
+                                      ColorsHelper.buttonGreyDark,
+                                    ],
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                  ),
+                            onPressed: () {
+                              if (controller.editButtonRectangle.value) {
+                                controller.saveNewRectangleDrawing();
+                              } else {
+                                controller.startNewRectangleDrawing();
+                              }
+                            },
+                            icon: Icon(
+                              Icons.rectangle_outlined,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Obx(
+                    () => controller.saveButtonEnable.value
+                        ? Padding(
+                            padding: const EdgeInsets.only(right: 10),
+                            child: CustomButtonComponent(
+                              onPressed: controller.saveButtonEnable.value
+                                  ? controller.saveButton
+                                  : null,
+                              icon: Icon(
+                                CupertinoIcons.floppy_disk,
+                                color: Colors.white,
+                              ),
+                            ),
+                          )
+                        : SizedBox.shrink(),
+                  ),
 
-                return Polygon(
-                  points: coords.map((c) => LatLng(c[1], c[0])).toList(),
-                  borderColor: isSelected ? Colors.blueAccent : Colors.black26,
-                  borderStrokeWidth: isSelected ? 2 : 1,
-                  color: isSelected
-                      ? Colors.blue.withOpacity(0.5)
-                      : Colors.black12.withOpacity(0.2),
-                );
-              }).toList(),
+                  Obx(() {
+                    if (controller.editButton.value) {
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: CustomButtonComponent(
+                          gradient: ColorsHelper.dangerGradient,
+                          onPressed: controller.cancelPolygonDrawing,
+                          icon: Icon(CupertinoIcons.clear, color: Colors.white),
+                        ),
+                      );
+                    } else if (controller.editButtonRectangle.value) {
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: CustomButtonComponent(
+                          gradient: ColorsHelper.dangerGradient,
+                          onPressed: controller.cancelRectangleDrawing,
+                          icon: Icon(CupertinoIcons.clear, color: Colors.white),
+                        ),
+                      );
+                    }
+                    return SizedBox.shrink();
+                  }),
+
+                  Obx(
+                    () => CustomButtonComponent(
+                      title: 'Simpan Data',
+                      onPressed: controller.polygons.value.isNotEmpty
+                          ? () {}
+                          : null,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
       ),
     );
-  }
-
-  /// CURSOR SELECT
-  void _selectByCursor(LatLng latLng) {
-    for (var f in controller.geojsonData) {
-      final id = f["properties"]["id"].toString();
-      final coords = f["geometry"]["coordinates"][0] as List;
-
-      final inside = coords.any((p) {
-        return (p[1] - latLng.latitude).abs() < 0.05 &&
-               (p[0] - latLng.longitude).abs() < 0.05;
-      });
-
-      if (inside && !controller.selectedRegions.contains(id)) {
-        controller.selectedRegions.add(id);
-      }
-    }
-  }
-
-  /// LIVE DRAG PREVIEW
-  Widget _dragPreview() {
-    return Positioned.fill(
-      child: IgnorePointer(
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.redAccent, width: 2),
-            color: Colors.red.withOpacity(0.15),
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Convert Tap → LatLng
-  LatLng _tapToLatLng(BuildContext context, Offset position) {
-    final mapCamera = MapCamera.of(context);
-
-    // Konversi Offset → Point<num>
-    final point = Point(position.dx, position.dy);
-
-    return mapCamera.pointToLatLng(point);
   }
 }

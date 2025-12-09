@@ -11,9 +11,7 @@ class ToponimController extends GetxController {
   RxString desa = "Pabuarang".obs;
 
   // 🎞 Foto
-  RxString imagePreview =
-      "https://i.pinimg.com/originals/7f/e6/9a/7fe69a8e15ab4d1568d94aa123f4d630.jpg"
-          .obs;
+  RxString imagePreview = "https://picsum.photos/seed/picsum/200/300".obs;
 
   // 🔽 Dropdown Values
   RxString? jenisUnsur = RxString("");

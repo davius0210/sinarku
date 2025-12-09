@@ -14,6 +14,7 @@ import 'package:sinarku/components/custom_filepicker_component.dart';
 import 'package:sinarku/components/custom_middle_navbar_component.dart';
 import 'package:sinarku/components/custom_text_component.dart';
 import 'package:sinarku/components/label_divider_component.dart';
+import 'package:sinarku/components/layer_component.dart';
 import 'package:sinarku/helper/colors_helper.dart';
 import 'package:sinarku/helper/constant_helper.dart';
 import 'package:sinarku/helper/function_helper.dart';
@@ -68,24 +69,26 @@ class HomeView extends GetView<HomeController> {
             child: FlutterMap(
               mapController: controller.mapController,
               options: MapOptions(
-                onMapEvent: (event){
+                initialCenter: LatLng(-6.2088, 106.8456),
+                initialZoom: 14,
+                onMapEvent: (event) {
                   HapticFeedback.lightImpact();
-                  if (event is MapEventMoveEnd && controller.isRekamToponim.value) {
+                  if (event is MapEventMoveEnd &&
+                      controller.isRekamToponim.value) {
                     final center = controller.mapController.camera.center;
                     controller.currentCenter.value = center;
                     controller.fetchLocationInfo(center);
                   }
                 },
-                onPositionChanged: (position, hasGesture) {
-                  
-                },
+                onPositionChanged: (position, hasGesture) {},
               ),
               children: [
                 TileLayer(
-                  urlTemplate: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                  urlTemplate:
+                      'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
                   maxZoom: 18,
                 ),
-                
+
                 MarkerLayer(
                   markers: [
                     Marker(
@@ -95,7 +98,6 @@ class HomeView extends GetView<HomeController> {
                       child: const FlutterLogo(),
                     ),
                   ],
-                  
                 ),
               ],
             ),
@@ -159,7 +161,7 @@ class HomeView extends GetView<HomeController> {
                   Expanded(
                     child: GestureDetector(
                       onTap: () {
-                        Get.toNamed(Routes.UNDUH_BASEMAP);
+                        Get.toNamed(Routes.REKAMJEJAK);
                       },
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -206,7 +208,8 @@ class HomeView extends GetView<HomeController> {
                     borderRadius: BorderRadius.circular(50),
                     child: InkWell(
                       onTap: () {
-                        controller.isRekamToponim.value = !controller.isRekamToponim.value;
+                        controller.isRekamToponim.value =
+                            !controller.isRekamToponim.value;
                       },
                       borderRadius: BorderRadius.circular(50),
                       child: Ink(
@@ -316,7 +319,68 @@ class HomeView extends GetView<HomeController> {
                     SizedBox(width: 10),
                     CustomButtonComponent(
                       icon: Icon(Icons.layers, size: 30, color: Colors.white),
-                      onPressed: () {},
+                      onPressed: () {
+                        FunctionHelper.showDialog(
+                          context,
+                          height: 400,
+                          title: 'Layer',
+                          content: Obx(
+                            () => Column(
+                              children: [
+                                LayerComponent(
+                                  title: "Toponim Sekitar",
+                                  value: controller.toponimSekitar.value,
+                                  sliderValue: controller.valSekitar.value,
+                                  onChangedCheck: (v) =>
+                                      controller.toponimSekitar.value = v!,
+                                  onChangedSlider: (v) =>
+                                      controller.valSekitar.value = v,
+                                ),
+
+                                LayerComponent(
+                                  title: "Toponim Hasil Survei",
+                                  value: controller.toponimHasil.value,
+                                  sliderValue: controller.valHasil.value,
+                                  onChangedCheck: (v) =>
+                                      controller.toponimHasil.value = v!,
+                                  onChangedSlider: (v) =>
+                                      controller.valHasil.value = v,
+                                ),
+
+                                LayerComponent(
+                                  title: "Service Peta Dasar",
+                                  value: controller.serviceDasar.value,
+                                  sliderValue: controller.valDasar.value,
+                                  onChangedCheck: (v) =>
+                                      controller.serviceDasar.value = v!,
+                                  onChangedSlider: (v) =>
+                                      controller.valDasar.value = v,
+                                ),
+
+                                Row(
+                                  children: [
+                                    Checkbox(
+                                      value: controller.dataLain.value,
+                                      onChanged: (v) =>
+                                          controller.dataLain.value = v!,
+                                    ),
+                                    const Text(
+                                      "Data Lain",
+                                      style: TextStyle(color: Colors.grey),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          footer: CustomButtonComponent(
+                            width: double.infinity,
+                            title: "Ok",
+                            icon: Icon(Icons.check, color: Colors.white),
+                            onPressed: () {},
+                          ),
+                        );
+                      },
                       borderRadius: BorderRadius.circular(50),
                     ),
                     SizedBox(width: 10),
@@ -359,7 +423,9 @@ class HomeView extends GetView<HomeController> {
                                           color: Colors.white,
                                         ),
                                         title: 'Unduh',
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          Get.toNamed(Routes.UNDUH_BASEMAP);
+                                        },
                                       ),
                                     ),
                                   ],
@@ -454,8 +520,20 @@ class HomeView extends GetView<HomeController> {
 
                                             dropdownItems: [
                                               DropdownMenuItem(
-                                                value: 'esri',
-                                                child: Text('Esri Imagery'),
+                                                value: 'aoi',
+                                                child: Text('Area Of Interest'),
+                                              ),
+                                              DropdownMenuItem(
+                                                value: 'batas_wilayah',
+                                                child: Text('Batas Wilayah'),
+                                              ),
+                                              DropdownMenuItem(
+                                                value: 'current_view',
+                                                child: Text('Current View'),
+                                              ),
+                                              DropdownMenuItem(
+                                                value: 'data_kml',
+                                                child: Text('Data KML/KMZ/SHP'),
                                               ),
                                             ],
                                             onDropdownChanged: (value) {},
@@ -502,17 +580,32 @@ class HomeView extends GetView<HomeController> {
               onPressed: () {},
             ),
           ),
-          Obx(()=>(controller.isRekamToponim.value) ? Align(alignment: Alignment.center,child: Icon(FontAwesomeIcons.mapPin, color: Colors.amberAccent,size: 44,),) : SizedBox.shrink()),
-          
-          Obx(()=>(controller.isRekamToponim.value) ? Positioned(
-            top: -260,
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: infoPopup(), // lihat fungsi di bawah
-            ),
-          ) : SizedBox.shrink())
+          Obx(
+            () => (controller.isRekamToponim.value)
+                ? Align(
+                    alignment: Alignment.center,
+                    child: Icon(
+                      FontAwesomeIcons.mapPin,
+                      color: Colors.amberAccent,
+                      size: 44,
+                    ),
+                  )
+                : SizedBox.shrink(),
+          ),
+
+          Obx(
+            () => (controller.isRekamToponim.value)
+                ? Positioned(
+                    top: -260,
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: infoPopup(), // lihat fungsi di bawah
+                    ),
+                  )
+                : SizedBox.shrink(),
+          ),
         ],
       ),
     );
@@ -527,58 +620,60 @@ class HomeView extends GetView<HomeController> {
       const Center(child: Text("Profile Screen")),
     ];
   }
+
   Widget infoPopup() {
-  return Obx(() {
-    if (controller.currentCenter.value == null) return const SizedBox();
+    return Obx(() {
+      if (controller.currentCenter.value == null) return const SizedBox();
 
-    return Container(
-      padding: const EdgeInsets.all(8),
-      width: 230,
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 5)],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Koordinat: "
-            "${controller.currentCenter.value!.latitude.toStringAsFixed(6)}, "
-            "${controller.currentCenter.value!.longitude.toStringAsFixed(6)}",
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 6),
+      return Container(
+        padding: const EdgeInsets.all(8),
+        width: 230,
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 5)],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Koordinat: "
+              "${controller.currentCenter.value!.latitude.toStringAsFixed(6)}, "
+              "${controller.currentCenter.value!.longitude.toStringAsFixed(6)}",
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 6),
 
-          // 🔄 Jika loading alamat
-          if (controller.isLoadingAddress.value)
-            const Center(
+            // 🔄 Jika loading alamat
+            if (controller.isLoadingAddress.value)
+              const Center(
                 child: Padding(
-              padding: EdgeInsets.all(4),
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )),
+                  padding: EdgeInsets.all(4),
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
 
-          // 📍 Menampilkan alamat jika sudah ada
-          if (controller.address.value != null &&
-              !controller.isLoadingAddress.value) ...[
-            Text("Provinsi: ${controller.address.value!.provinsi ?? '-'}"),
-            Text("Kota/Kab: ${controller.address.value!.kota ?? '-'}"),
-            Text("Kec: ${controller.address.value!.kecamatan ?? '-'}"),
-            Text("Kel/Desa: ${controller.address.value!.kelurahan ?? '-'}"),
+            // 📍 Menampilkan alamat jika sudah ada
+            if (controller.address.value != null &&
+                !controller.isLoadingAddress.value) ...[
+              Text("Provinsi: ${controller.address.value!.provinsi ?? '-'}"),
+              Text("Kota/Kab: ${controller.address.value!.kota ?? '-'}"),
+              Text("Kec: ${controller.address.value!.kecamatan ?? '-'}"),
+              Text("Kel/Desa: ${controller.address.value!.kelurahan ?? '-'}"),
+            ],
+
+            const SizedBox(height: 6),
+            CustomButtonComponent(
+              width: double.infinity,
+              onPressed: () {
+                Get.toNamed(Routes.TOPONIM);
+              },
+              title: 'Lengkapi Data',
+            ),
           ],
-
-          const SizedBox(height: 6),
-          CustomButtonComponent(
-            width: double.infinity,
-            onPressed: () {
-              Get.toNamed(Routes.TOPONIM);
-            },
-            title: 'Lengkapi Data',
-          )
-        ],
-      ),
-    );
-  });
-}
+        ),
+      );
+    });
+  }
 }

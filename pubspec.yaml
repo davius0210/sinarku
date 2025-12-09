@@ -44,6 +44,8 @@ dependencies:
   latlong2: ^0.9.1
   file_picker: ^10.3.7
   geobase: ^1.5.0
+  maplibre: ^0.1.1
+  flutter_map_maplibre: ^0.0.2
 
 dev_dependencies:
   flutter_test:

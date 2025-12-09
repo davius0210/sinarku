@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:sinarku/components/empty_component.dart';
 
 import '../controllers/syncdata_controller.dart';
 
@@ -10,13 +11,39 @@ class SyncdataView extends GetView<SyncdataController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('SyncdataView'),
+        title: const Text('Hasil Pendataan Nama Rupabumi'),
         centerTitle: true,
       ),
-      body: const Center(
-        child: Text(
-          'SyncdataView is working',
-          style: TextStyle(fontSize: 20),
+      body: DefaultTabController(
+        length: 2,
+        child: Column(
+          children: [
+            Container(
+              color: Colors.grey.shade200,
+              child: const TabBar(
+                labelColor: Colors.black,
+                unselectedLabelColor: Colors.grey,
+                indicatorColor: Color(0xff024A7E),
+                indicatorWeight: 3,
+                tabs: [
+                  Tab(text: "Daftar Data"),
+                  Tab(text: "Sebaran Data"),
+                ],
+              ),
+            ),
+            Expanded(
+              child: TabBarView(
+                children: [
+                  Center(
+                    child: CustomEmptyWidget(title: 'Data Tidak Tersedia'),
+                  ),
+                  Center(
+                    child: CustomEmptyWidget(title: 'Data Tidak Tersedia'),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

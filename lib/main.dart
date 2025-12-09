@@ -17,6 +17,27 @@ void main() {
         scaffoldBackgroundColor: Colors.white,
         primaryColorLight: ColorsHelper.primary,
         primaryColor: ColorsHelper.blue,
+        checkboxTheme: CheckboxThemeData(
+          checkColor: WidgetStatePropertyAll(Colors.white),
+          fillColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return ColorsHelper.primary; // track saat ON
+            }
+            return Colors.white; // track saat OFF
+          }),
+          side: BorderSide(color: ColorsHelper.border),
+
+          overlayColor: WidgetStateProperty.all(Colors.white),
+        ),
+        switchTheme: SwitchThemeData(
+          thumbColor: WidgetStateProperty.all(Colors.white),
+          trackColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return ColorsHelper.primary; // track saat ON
+            }
+            return ColorsHelper.disable; // track saat OFF
+          }),
+        ),
         appBarTheme: AppBarTheme(
           backgroundColor: ColorsHelper.primary,
           titleTextStyle: TextStyle(

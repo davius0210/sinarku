@@ -7,8 +7,9 @@ class CustomButtonComponent extends StatefulWidget {
   final Widget? icon;
   final BorderRadius? borderRadius;
   final double? width;
-  final Gradient? gradient; // New optional gradient
-  final Color? color; // New optional color
+  final Gradient? gradient;
+  final Color? color;
+  final BoxBorder? border; // New optional border
 
   const CustomButtonComponent({
     super.key,
@@ -17,8 +18,9 @@ class CustomButtonComponent extends StatefulWidget {
     this.title,
     this.borderRadius,
     this.width,
-    this.gradient, // Add to constructor
-    this.color, // Add to constructor
+    this.gradient,
+    this.color,
+    this.border, // Add to constructor
   });
 
   @override
@@ -65,7 +67,8 @@ class _CustomButtonComponentState extends State<CustomButtonComponent> {
                         )),
               color: widget.onPressed == null
                   ? Colors.grey
-                  : (widget.color ?? null), // Use widget.color if provided
+                  : (widget.color ?? null),
+              border: widget.border, // Use the new border property
             ),
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 250),
