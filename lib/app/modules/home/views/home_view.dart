@@ -15,8 +15,12 @@ import 'package:sinarku/components/custom_middle_navbar_component.dart';
 import 'package:sinarku/components/custom_text_component.dart';
 import 'package:sinarku/components/label_divider_component.dart';
 import 'package:sinarku/components/layer_component.dart';
+import 'package:sinarku/components/popup_with_arrow_component.dart';
+import 'package:sinarku/components/ripple_pin_location_component.dart';
+import 'package:sinarku/components/status_indicator_component.dart';
 import 'package:sinarku/helper/colors_helper.dart';
 import 'package:sinarku/helper/constant_helper.dart';
+import 'package:sinarku/helper/custom_toast_helper.dart';
 import 'package:sinarku/helper/function_helper.dart';
 
 import '../controllers/home_controller.dart';
@@ -52,6 +56,18 @@ class HomeView extends GetView<HomeController> {
         ),
         centerTitle: false,
         actions: [
+          Obx(
+            () => StatusIndicator(
+              size: 15,
+              gradientColors: controller.isOnline.value
+                  ? controller.isProses.value
+                        ? ColorsHelper.warningGradient
+                        : ColorsHelper.successGradient
+                  : ColorsHelper.dangerGradient,
+              duration: const Duration(seconds: 2),
+              repeatCount: -1, // infinite glow
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
@@ -99,6 +115,53 @@ class HomeView extends GetView<HomeController> {
                     ),
                   ],
                 ),
+                Obx(() {
+                  return MarkerLayer(
+                    markers: [
+                      Marker(
+                        point: controller.currentLocation.value!,
+                        width: 80,
+                        height: 80,
+                        alignment: Alignment.center,
+                        child: GestureDetector(
+                          onPanUpdate: (details) {
+                            // optional: drag marker pakai screen delta
+                          },
+                          child: const RippleLocationPin(
+                            size: 14,
+                            color: Colors.lightGreenAccent,
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                }),
+                Obx(() {
+                  if (!controller.isRekamToponim.value ||
+                      controller.currentCenter.value == null) {
+                    return const SizedBox();
+                  }
+
+                  return MarkerLayer(
+                    markers: [
+                      Marker(
+                        point: controller.currentCenter.value!,
+                        width: 80,
+                        height: 80,
+                        alignment: Alignment.center,
+                        child: GestureDetector(
+                          onPanUpdate: (details) {
+                            // optional: drag marker pakai screen delta
+                          },
+                          child: const RippleLocationPin(
+                            size: 14,
+                            color: Colors.red,
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                }),
               ],
             ),
           ),
@@ -210,6 +273,13 @@ class HomeView extends GetView<HomeController> {
                       onTap: () {
                         controller.isRekamToponim.value =
                             !controller.isRekamToponim.value;
+                        if (controller.isRekamToponim.value) {
+                          ToastHelper.show(
+                            context,
+                            message:
+                                'Anda berada di mode edit toponim. Silahkan geser pin untuk mengubah lokasi',
+                          );
+                        }
                       },
                       borderRadius: BorderRadius.circular(50),
                       child: Ink(
@@ -577,22 +647,24 @@ class HomeView extends GetView<HomeController> {
             child: CustomButtonComponent(
               icon: Icon(Icons.gps_fixed, size: 30, color: Colors.white),
               borderRadius: BorderRadius.circular(50),
-              onPressed: () {},
+              onPressed: () async {
+                await controller.initLocation();
+              },
             ),
           ),
-          Obx(
-            () => (controller.isRekamToponim.value)
-                ? Align(
-                    alignment: Alignment.center,
-                    child: Icon(
-                      FontAwesomeIcons.mapPin,
-                      color: Colors.amberAccent,
-                      size: 44,
-                    ),
-                  )
-                : SizedBox.shrink(),
-          ),
 
+          // Obx(
+          //   () => (controller.isRekamToponim.value)
+          //       ? Align(
+          //           alignment: Alignment.center,
+          //           child: Icon(
+          //             FontAwesomeIcons.mapPin,
+          //             color: Colors.amberAccent,
+          //             size: 44,
+          //           ),
+          //         )
+          //       : SizedBox.shrink(),
+          // ),
           Obx(
             () => (controller.isRekamToponim.value)
                 ? Positioned(
@@ -624,52 +696,59 @@ class HomeView extends GetView<HomeController> {
   Widget infoPopup() {
     return Obx(() {
       if (controller.currentCenter.value == null) return const SizedBox();
-
-      return Container(
-        padding: const EdgeInsets.all(8),
-        width: 230,
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.9),
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 5)],
-        ),
+      return PopupWithArrow(
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Koordinat: "
-              "${controller.currentCenter.value!.latitude.toStringAsFixed(6)}, "
-              "${controller.currentCenter.value!.longitude.toStringAsFixed(6)}",
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 6),
-
-            // 🔄 Jika loading alamat
-            if (controller.isLoadingAddress.value)
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(4),
-                  child: CircularProgressIndicator(strokeWidth: 2),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Koordinat: "
+                  "${controller.currentCenter.value!.latitude.toStringAsFixed(6)}, "
+                  "${controller.currentCenter.value!.longitude.toStringAsFixed(6)}",
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-              ),
+                const SizedBox(height: 6),
 
-            // 📍 Menampilkan alamat jika sudah ada
-            if (controller.address.value != null &&
-                !controller.isLoadingAddress.value) ...[
-              Text("Provinsi: ${controller.address.value!.provinsi ?? '-'}"),
-              Text("Kota/Kab: ${controller.address.value!.kota ?? '-'}"),
-              Text("Kec: ${controller.address.value!.kecamatan ?? '-'}"),
-              Text("Kel/Desa: ${controller.address.value!.kelurahan ?? '-'}"),
-            ],
+                // 🔄 Jika loading alamat
+                if (controller.isLoadingAddress.value)
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(4),
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
 
-            const SizedBox(height: 6),
-            CustomButtonComponent(
-              width: double.infinity,
-              onPressed: () {
-                Get.toNamed(Routes.TOPONIM);
-              },
-              title: 'Lengkapi Data',
+                // 📍 Menampilkan alamat jika sudah ada
+                if (controller.address.value != null &&
+                    !controller.isLoadingAddress.value) ...[
+                  Text(
+                    "Provinsi: ${controller.address.value!.provinsi ?? '-'}",
+                  ),
+                  Text("Kota/Kab: ${controller.address.value!.kota ?? '-'}"),
+                  Text("Kec: ${controller.address.value!.kecamatan ?? '-'}"),
+                  Text(
+                    "Kel/Desa: ${controller.address.value!.kelurahan ?? '-'}",
+                  ),
+                ],
+
+                const SizedBox(height: 6),
+                CustomButtonComponent(
+                  width: double.infinity,
+                  onPressed: () {
+                    Get.toNamed(
+                      Routes.TOPONIM,
+                      arguments: {
+                        'heading': controller.heading.value, // ambil snapshot
+                        ...controller.dataMap,
+                      },
+                    );
+                  },
+                  title: 'Lengkapi Data',
+                ),
+              ],
             ),
           ],
         ),

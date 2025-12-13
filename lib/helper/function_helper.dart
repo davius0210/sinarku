@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_compass/flutter_compass.dart';
 
 class FunctionHelper {
   static void showDialog(
@@ -87,5 +88,11 @@ class FunctionHelper {
         );
       },
     );
+  }
+
+  static Stream<double?> getHeadingStream() {
+    return FlutterCompass.events!.map((event) {
+      return event.heading; // 0 - 360 derajat
+    });
   }
 }

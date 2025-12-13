@@ -7,6 +7,7 @@ import 'package:sinarku/helper/constant_helper.dart';
 import 'app/routes/app_pages.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(
     GetMaterialApp(
       title: ConstantHelper.title_apps,
