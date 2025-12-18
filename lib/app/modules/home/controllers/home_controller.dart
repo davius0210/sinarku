@@ -46,6 +46,7 @@ class HomeController extends GetxController {
   MapController mapController = MapController();
   Rxn<LatLng> currentCenter = Rxn<LatLng>();
   Rxn<LatLng> currentLocation = Rxn<LatLng>();
+  Rxn<Position> currentPosition = Rxn<Position>();
   final RxBool isLoadingLocation = true.obs;
   var isRekamToponim = false.obs;
   var dataMap = {}.obs;
@@ -120,11 +121,12 @@ class HomeController extends GetxController {
     }
 
     final position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
+      desiredAccuracy: LocationAccuracy.bestForNavigation,
     );
 
     currentCenter.value = LatLng(position.latitude, position.longitude);
     currentLocation.value = LatLng(position.latitude, position.longitude);
+    currentPosition.value = position;
 
     mapController.move(currentCenter.value!, 17);
 

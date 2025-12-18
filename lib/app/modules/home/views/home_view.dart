@@ -165,6 +165,71 @@ class HomeView extends GetView<HomeController> {
               ],
             ),
           ),
+          Positioned(
+            left: 10,
+            bottom: 100,
+            child: Container(
+              padding: EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                color: ColorsHelper.primary.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Obx(
+                () => Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.satellite_alt, color: Colors.white),
+                        SizedBox(width: 5),
+                        Text(
+                          'Satellite',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Icon(Icons.terrain, color: Colors.white),
+                        SizedBox(width: 5),
+                        Text(
+                          controller.currentPosition.value!.altitude
+                                  .toString() +
+                              ' m',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Icon(Icons.speed, color: Colors.white),
+                        SizedBox(width: 5),
+                        Text(
+                          controller.currentPosition.value!.speed.toString() +
+                              ' km/h',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Icon(Icons.my_location, color: Colors.white),
+                        SizedBox(width: 5),
+                        Text(
+                          controller.currentPosition.value!.accuracy
+                                  .toString() +
+                              ' m',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
@@ -286,19 +351,20 @@ class HomeView extends GetView<HomeController> {
                         height: 60,
                         width: 60,
                         decoration: BoxDecoration(
+                          // color: ColorsHelper.primary,
                           borderRadius: BorderRadius.circular(50),
                           gradient: LinearGradient(
                             colors: [ColorsHelper.primary, ColorsHelper.blue],
                             begin: Alignment.bottomCenter,
                             end: Alignment.topCenter,
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black26,
-                              blurRadius: 10,
-                              offset: Offset(0, 5),
-                            ),
-                          ],
+                          // boxShadow: [
+                          //   BoxShadow(
+                          //     color: Colors.black26,
+                          //     blurRadius: 10,
+                          //     offset: Offset(0, 5),
+                          //   ),
+                          // ],
                         ),
                         child: Center(
                           child: FaIcon(
@@ -319,6 +385,7 @@ class HomeView extends GetView<HomeController> {
               ],
             ),
           ),
+
           Container(
             width: double.infinity,
 

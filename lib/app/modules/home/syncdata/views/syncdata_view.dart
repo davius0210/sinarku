@@ -11,7 +11,7 @@ class SyncdataView extends GetView<SyncdataController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Hasil Pendataan Nama Rupabumi'),
+        title: const Text('Daftar Data Toponim'),
         centerTitle: true,
       ),
       body: DefaultTabController(

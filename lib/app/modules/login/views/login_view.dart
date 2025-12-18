@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
@@ -86,12 +87,15 @@ class LoginView extends GetView<LoginController> {
                     ],
                   ),
                   LabeledDivider(label: 'ATAU'),
-                  SocialMediaButton(
-                    ButtonsSocialMedia.Apple,
-                    text: "Masuk dengan Apple",
-                    onPressed: () {},
-                  ),
-                  SizedBox(height: 10),
+                  if (Platform.isIOS)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 10.0),
+                      child: SocialMediaButton(
+                        ButtonsSocialMedia.Apple,
+                        text: "Masuk dengan Apple",
+                        onPressed: () {},
+                      ),
+                    ),
                   SocialMediaButton(
                     ButtonsSocialMedia.Google,
                     text: "Masuk dengan Google",
@@ -99,8 +103,8 @@ class LoginView extends GetView<LoginController> {
                   ),
                   SizedBox(height: 10),
                   SocialMediaButton(
-                    ButtonsSocialMedia.WhatsApp,
-                    text: "Masuk dengan Whatsapp",
+                    ButtonsSocialMedia.Facebook,
+                    text: "Masuk dengan Facebook",
                     onPressed: () {},
                   ),
                 ],

@@ -20,7 +20,9 @@ class UnduhBasemapView extends GetView<UnduhBasemapController> {
       appBar: AppBar(title: Text('Unduh Batas')),
       body: Stack(
         children: [
-          Expanded(
+          Container(
+            height: double.infinity,
+            width: double.infinity,
             child: FlutterMap(
               children: [
                 TileLayer(

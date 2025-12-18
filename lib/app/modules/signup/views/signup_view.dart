@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -165,12 +167,16 @@ class SignupView extends GetView<SignupController> {
                 SizedBox(height: 20),
                 LabeledDivider(label: 'ATAU'),
                 SizedBox(height: 10),
-                SocialMediaButton(
-                  ButtonsSocialMedia.Apple,
-                  text: "Masuk dengan Apple",
-                  onPressed: () {},
-                ),
-                SizedBox(height: 10),
+                if (Platform.isIOS)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10.0),
+                    child: SocialMediaButton(
+                      ButtonsSocialMedia.Apple,
+                      text: "Masuk dengan Apple",
+                      onPressed: () {},
+                    ),
+                  ),
+
                 SocialMediaButton(
                   ButtonsSocialMedia.Google,
                   text: "Masuk dengan Google",
@@ -178,8 +184,8 @@ class SignupView extends GetView<SignupController> {
                 ),
                 SizedBox(height: 10),
                 SocialMediaButton(
-                  ButtonsSocialMedia.WhatsApp,
-                  text: "Masuk dengan Whatsapp",
+                  ButtonsSocialMedia.Facebook,
+                  text: "Masuk dengan Facebook",
                   onPressed: () {},
                 ),
               ],

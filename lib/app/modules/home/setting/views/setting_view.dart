@@ -27,12 +27,12 @@ class SettingView extends GetView<SettingController> {
                 title: const Text('Backup Data'),
                 onPressed: () {},
               ),
-              CardTileMenu(
-                prefix: const Icon(Icons.fingerprint),
+              // CardTileMenu(
+              //   prefix: const Icon(Icons.fingerprint),
 
-                title: const Text('Aktifasi Biometrik'),
-                suffix: Switch(value: true, onChanged: (val) {}),
-              ),
+              //   title: const Text('Aktifasi Biometrik'),
+              //   suffix: Switch(value: true, onChanged: (val) {}),
+              // ),
             ],
           ),
         ],
