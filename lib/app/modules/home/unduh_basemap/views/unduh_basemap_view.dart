@@ -45,6 +45,9 @@ class UnduhBasemapView extends GetView<UnduhBasemapController> {
               ],
               options: MapOptions(
                 initialCenter: LatLng(-6.2088, 106.8456),
+                interactionOptions: InteractionOptions(
+                  enableMultiFingerGestureRace: false,
+                ),
                 onTap: (_, ll) {
                   controller.polyEditor.value?.add([
                     LatLng(-6.2088, 106.8456),

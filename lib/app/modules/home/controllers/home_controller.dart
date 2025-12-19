@@ -151,8 +151,8 @@ class HomeController extends GetxController {
       currentCenter.value = LatLng(position.latitude, position.longitude);
       currentLocation.value = LatLng(position.latitude, position.longitude);
       currentPosition.value = position;
-      mapController.move(currentCenter.value!, 17);
     });
+    mapController.move(currentCenter.value!, 17);
   }
 
   @override

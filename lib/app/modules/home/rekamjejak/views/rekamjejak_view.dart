@@ -76,7 +76,11 @@ class RekamjejakView extends GetView<RekamjejakController> {
             initialCenter: LatLng(-6.2088, 106.8456),
             initialZoom: 17,
             initialRotation: 15,
+            interactionOptions: InteractionOptions(
+              enableMultiFingerGestureRace: false,
+            ),
           ),
+
           children: [
             TileLayer(
               // Menggunakan CartoDB Positron (Light Mode)

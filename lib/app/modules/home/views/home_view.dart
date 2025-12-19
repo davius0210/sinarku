@@ -87,10 +87,12 @@ class HomeView extends GetView<HomeController> {
             child: FlutterMap(
               mapController: controller.mapController,
               options: MapOptions(
+                interactionOptions: InteractionOptions(
+                  enableMultiFingerGestureRace: false,
+                ),
                 initialCenter: LatLng(-6.2088, 106.8456),
                 initialZoom: 14,
                 onMapEvent: (event) {
-                  HapticFeedback.lightImpact();
                   if (event is MapEventMoveEnd &&
                       controller.isRekamToponim.value) {
                     final center = controller.mapController.camera.center;
@@ -283,7 +285,7 @@ class HomeView extends GetView<HomeController> {
                         SizedBox(width: 5),
                         Text(
                           controller.currentPosition.value!.altitude
-                                  .toString() +
+                                  .toStringAsFixed(2) +
                               ' m',
                           style: TextStyle(color: Colors.white),
                         ),
@@ -294,7 +296,8 @@ class HomeView extends GetView<HomeController> {
                         Icon(Icons.speed, color: Colors.white),
                         SizedBox(width: 5),
                         Text(
-                          controller.currentPosition.value!.speed.toString() +
+                          controller.currentPosition.value!.speed
+                                  .toStringAsFixed(2) +
                               ' km/h',
                           style: TextStyle(color: Colors.white),
                         ),
@@ -306,7 +309,7 @@ class HomeView extends GetView<HomeController> {
                         SizedBox(width: 5),
                         Text(
                           controller.currentPosition.value!.accuracy
-                                  .toString() +
+                                  .toStringAsFixed(2) +
                               ' m',
                           style: TextStyle(color: Colors.white),
                         ),
