@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -99,41 +101,119 @@ class HomeView extends GetView<HomeController> {
                 onPositionChanged: (position, hasGesture) {},
               ),
               children: [
+                // TileLayer(
+                //   urlTemplate:
+                //       'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                //   maxZoom: 18,
+                // ),
                 TileLayer(
+                  // Menggunakan CartoDB Positron (Light Mode)
                   urlTemplate:
-                      'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                      'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.sinarku.app',
                   maxZoom: 18,
                 ),
 
-                MarkerLayer(
-                  markers: [
-                    Marker(
-                      point: const LatLng(51.5, -0.09),
-                      width: 80,
-                      height: 80,
-                      child: const FlutterLogo(),
-                    ),
-                  ],
-                ),
                 Obx(() {
                   return MarkerLayer(
                     markers: [
                       Marker(
                         point: controller.currentLocation.value!,
-                        width: 80,
-                        height: 80,
+                        width: 45,
+                        height: 45,
+                        // Gunakan bottomCenter agar koordinat GPS pas di titik PIN
                         alignment: Alignment.center,
                         child: GestureDetector(
                           onPanUpdate: (details) {
                             // optional: drag marker pakai screen delta
                           },
-                          child: const RippleLocationPin(
-                            size: 14,
-                            color: Colors.lightGreenAccent,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(color: Colors.black26, blurRadius: 4),
+                              ],
+                            ),
+                            child: Transform.rotate(
+                              // Rotasi berdasarkan heading dari GPS
+                              angle:
+                                  controller.CurrentHeading.value *
+                                  (3.1415926535897932 / 180),
+                              child: const Icon(
+                                Icons
+                                    .navigation, // Icon ini berbentuk panah arah
+                                color: Colors.blue,
+                                size: 25,
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ],
+                  );
+                }),
+                Obx(() {
+                  // Pastikan queueMap.value tidak kosong
+                  if (controller.queueMap.value.isEmpty)
+                    return const SizedBox();
+
+                  return MarkerLayer(
+                    markers: controller.queueMap.value.map((e) {
+                      final _data = jsonDecode(e['payload'].toString());
+                      final _address = _data['alamat'];
+                      final coordinate = _data['koordinat'];
+                      print(coordinate);
+                      return Marker(
+                        point: LatLng(coordinate['lat'], coordinate['lng']),
+                        // --- TAMBAHKAN WIDTH DAN HEIGHT DISINI ---
+                        width: 300,
+                        height: 300,
+                        alignment: Alignment.center,
+                        child: RippleLocationPin(
+                          infoWidget: Column(
+                            mainAxisSize: MainAxisSize
+                                .min, // Agar tidak overflow ke bawah
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Koordinat: ${coordinate['lat'].toStringAsFixed(2)}, ${coordinate['lng'].toStringAsFixed(2)}",
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 11,
+                                ),
+                              ),
+                              const Divider(height: 10),
+                              Text(
+                                "Provinsi: ${_address['provinsi'] ?? '-'}",
+                                style: const TextStyle(fontSize: 10),
+                              ),
+                              Text(
+                                "Kota/Kab: ${_address['kabupaten_kota'] ?? '-'}",
+                                style: const TextStyle(fontSize: 10),
+                              ),
+                              Text(
+                                "Kec: ${_address['kecamatan'] ?? '-'}",
+                                style: const TextStyle(fontSize: 10),
+                              ),
+                              Text(
+                                "Kel/Desa: ${_address['desa_kelurahan'] ?? '-'}",
+                                style: const TextStyle(fontSize: 10),
+                              ),
+                              const SizedBox(height: 6),
+                            ],
+                          ),
+                          size: 14,
+                          color: Colors.red,
+                          onTapInfo: () {
+                            Get.toNamed(
+                              Routes.DETAIL_TOPONIM,
+                              arguments: _data,
+                            );
+                          },
+                        ),
+                      );
+                    }).toList(),
                   );
                 }),
                 Obx(() {
@@ -167,11 +247,18 @@ class HomeView extends GetView<HomeController> {
           ),
           Positioned(
             left: 10,
-            bottom: 100,
+            bottom: 105,
             child: Container(
-              padding: EdgeInsets.all(5),
+              padding: EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: ColorsHelper.primary.withOpacity(0.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Obx(
@@ -804,14 +891,21 @@ class HomeView extends GetView<HomeController> {
                 const SizedBox(height: 6),
                 CustomButtonComponent(
                   width: double.infinity,
-                  onPressed: () {
-                    Get.toNamed(
+                  onPressed: () async {
+                    var result = await Get.toNamed(
                       Routes.TOPONIM,
                       arguments: {
+                        'koordinat': {
+                          'lat': controller.currentCenter.value!.latitude,
+                          'lng': controller.currentCenter.value!.longitude,
+                        },
                         'heading': controller.heading.value, // ambil snapshot
                         ...controller.dataMap,
                       },
                     );
+                    if (result != null && result) {
+                      controller.getAllQueue();
+                    }
                   },
                   title: 'Lengkapi Data',
                 ),

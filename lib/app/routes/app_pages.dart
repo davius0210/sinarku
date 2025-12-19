@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import '../modules/forgotpassword/bindings/forgotpassword_binding.dart';
 import '../modules/forgotpassword/views/forgotpassword_view.dart';
 import '../modules/home/bindings/home_binding.dart';
+import '../modules/home/detail_toponim/bindings/detail_toponim_binding.dart';
+import '../modules/home/detail_toponim/views/detail_toponim_view.dart';
 import '../modules/home/mapscreen/bindings/mapscreen_binding.dart';
 import '../modules/home/mapscreen/views/mapscreen_view.dart';
 import '../modules/home/profile/bindings/profile_binding.dart';
@@ -88,6 +90,11 @@ class AppPages {
           name: _Paths.UNDUH_BASEMAP,
           page: () => const UnduhBasemapView(),
           binding: UnduhBasemapBinding(),
+        ),
+        GetPage(
+          name: _Paths.DETAIL_TOPONIM,
+          page: () => const DetailToponimView(),
+          binding: DetailToponimBinding(),
         ),
       ],
     ),

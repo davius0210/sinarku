@@ -1,10 +1,13 @@
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_line_editor/flutter_map_line_editor.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
 
 class UnduhBasemapController extends GetxController {
+  Rxn<PolyEditor> polyEditor = Rxn<PolyEditor>();
   Rx<List<Polygon>> polygons = Rx([]);
   Rx<List<LatLng>> polygonPoints = Rx([]);
   var isDrawing = false.obs;
@@ -17,47 +20,76 @@ class UnduhBasemapController extends GetxController {
       false.obs; // True indicates the next point starts a new rectangle
 
   void addPolygon(LatLng pointPath) {
-    if (editButton.value == false) {
-      return;
-    }
+    if (!editButton.value) return;
+
+    // === START POLYGON BARU ===
     if (isNewPolygon.value) {
-      // Start a new polygon
-      polygonPoints.value = [
-        pointPath,
-      ]; // Clear existing points and add the first one
-      polygons.value.add(
-        Polygon(
-          points: polygonPoints.value,
-          color: const Color.fromRGBO(130, 0, 0, 0.5), // Example color
-          borderColor: const Color.fromRGBO(
-            130,
-            0,
-            0,
-            1,
-          ), // Example border color
-          borderStrokeWidth: 2,
-          isFilled: true,
-        ),
+      polygonPoints.value.assignAll([pointPath]);
+
+      final polygon = Polygon(
+        points: List<LatLng>.from(polygonPoints.value),
+        color: const Color.fromRGBO(130, 0, 0, 0.5),
+        borderColor: const Color.fromRGBO(130, 0, 0, 1),
+        borderStrokeWidth: 2,
+        isFilled: true,
       );
-      polygons.refresh(); // Notify GetX about the change in the list
-      isNewPolygon.value = false; // Next points will extend this polygon
-    } else {
-      // Add points to the current active polygon
-      if (polygons.value.isNotEmpty) {
-        polygonPoints.value.add(pointPath);
-        // Update the last polygon with the new set of points
-        polygons.value.last = Polygon(
-          points: List.from(
-            polygonPoints.value,
-          ), // Create a new list to ensure reactivity
-          color: polygons.value.last.color,
-          borderColor: polygons.value.last.borderColor,
-          borderStrokeWidth: polygons.value.last.borderStrokeWidth,
-          isFilled: polygons.value.last.isFilled,
-        );
-        polygons.refresh(); // Notify GetX about the change in the list item
-      }
+
+      polygons.value.add(polygon);
+      polygons.refresh();
+
+      isNewPolygon.value = false;
     }
+    // === TAMBAH TITIK KE POLYGON AKTIF ===
+    else {
+      if (polygons.value.isEmpty) return;
+
+      polygonPoints.value.add(pointPath);
+
+      final lastIndex = polygons.value.length - 1;
+      final oldPolygon = polygons.value[lastIndex];
+
+      polygons.value[lastIndex] = Polygon(
+        points: List<LatLng>.from(polygonPoints.value),
+        color: oldPolygon.color,
+        borderColor: oldPolygon.borderColor,
+        borderStrokeWidth: oldPolygon.borderStrokeWidth,
+        isFilled: oldPolygon.isFilled,
+      );
+
+      polygons.refresh();
+    }
+
+    // === POLY EDITOR (SATU TEMPAT) ===
+    polyEditor.value = PolyEditor(
+      points: polygonPoints.value,
+      pointIcon: const Icon(Icons.crop_square, size: 23),
+      intermediateIcon: const Icon(Icons.lens, size: 15, color: Colors.grey),
+      callbackRefresh: (updatedPoint) {
+        final index = polygonPoints.value.indexWhere(
+          (p) =>
+              p.latitude == updatedPoint!.latitude &&
+              p.longitude == updatedPoint.longitude,
+        );
+
+        if (index == -1) return;
+
+        polygonPoints.value[index] = updatedPoint!;
+
+        final lastIndex = polygons.value.length - 1;
+        final oldPolygon = polygons.value[lastIndex];
+
+        polygons.value[lastIndex] = Polygon(
+          points: List<LatLng>.from(polygonPoints.value),
+          color: oldPolygon.color,
+          borderColor: oldPolygon.borderColor,
+          borderStrokeWidth: oldPolygon.borderStrokeWidth,
+          isFilled: oldPolygon.isFilled,
+        );
+
+        polygons.refresh();
+      },
+      addClosePathMarker: false,
+    );
   }
 
   // Call this method when a button is clicked to indicate a new polygon should start

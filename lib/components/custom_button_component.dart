@@ -6,6 +6,7 @@ class CustomButtonComponent extends StatefulWidget {
   final String? title;
   final Widget? icon;
   final BorderRadius? borderRadius;
+  final String? loadingText;
   final double? width;
   final Gradient? gradient;
   final Color? color;
@@ -19,6 +20,7 @@ class CustomButtonComponent extends StatefulWidget {
     this.borderRadius,
     this.width,
     this.gradient,
+    this.loadingText,
     this.color,
     this.border, // Add to constructor
   });
@@ -73,13 +75,27 @@ class _CustomButtonComponentState extends State<CustomButtonComponent> {
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 250),
               child: isLoading
-                  ? Container(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        ),
+                        if (widget.loadingText != null)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 5.0),
+                            child: Text(
+                              widget.loadingText!,
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                      ],
                     )
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,

@@ -8,9 +8,12 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 /// ================================
 /// MODEL SYNC ITEM
 /// ================================
+enum SyncType { toponim, jejak }
+
 class SyncItem {
   final int? id;
   final String endpoint;
+  final SyncType type;
   final String method; // POST, PUT, DELETE
   final Map<String, dynamic> payload;
   final int isSynced; // 0 = belum, 1 = sudah
@@ -19,6 +22,7 @@ class SyncItem {
   SyncItem({
     this.id,
     required this.endpoint,
+    required this.type,
     required this.method,
     required this.payload,
     this.isSynced = 0,
@@ -29,6 +33,7 @@ class SyncItem {
     'id': id,
     'endpoint': endpoint,
     'method': method,
+    'type': type == SyncType.toponim ? 'toponim' : 'jejak',
     'payload': jsonEncode(payload),
     'is_synced': isSynced,
     'created_at': createdAt,
@@ -51,7 +56,7 @@ class LocalSyncDB {
   }
 
   Future<Database> _initDB() async {
-    final path = join(await getDatabasesPath(), 'sync_queue.db');
+    final path = join(await getDatabasesPath(), 'sync_data.db');
     return openDatabase(
       path,
       version: 1,
@@ -61,6 +66,7 @@ class LocalSyncDB {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             endpoint TEXT,
             method TEXT,
+            type TEXT,
             payload TEXT,
             is_synced INTEGER DEFAULT 0,
             created_at TEXT
@@ -80,6 +86,22 @@ class LocalSyncDB {
   Future<List<Map<String, dynamic>>> getUnsynced() async {
     final db = await database;
     return await db.query('sync_queue', where: 'is_synced = 0');
+  }
+
+  Future<List<Map<String, dynamic>>> getAllQueue(SyncType? type) async {
+    final db = await database;
+    return await db.query(
+      'sync_queue',
+      where: type != null ? 'type = ?' : null,
+      whereArgs: type != null
+          ? [type == SyncType.toponim ? 'toponim' : 'jejak']
+          : null,
+    );
+  }
+
+  Future<int> deleteAllQueue() async {
+    final db = await database;
+    return await db.delete('sync_queue');
   }
 
   /// UPDATE STATUS SYNC
@@ -106,19 +128,20 @@ class SyncService {
   Future<void> sendOrQueue({
     required String endpoint,
     required String method,
+    required SyncType type,
     required Map<String, dynamic> payload,
   }) async {
     final connectivity = await Connectivity().checkConnectivity();
 
     if (connectivity == ConnectivityResult.none) {
-      await _saveToLocal(endpoint, method, payload);
+      await _saveToLocal(endpoint, method, payload, type);
       return;
     }
 
     try {
       await _sendToServer(endpoint, method, payload);
     } catch (_) {
-      await _saveToLocal(endpoint, method, payload);
+      await _saveToLocal(endpoint, method, payload, type);
     }
   }
 
@@ -165,12 +188,14 @@ class SyncService {
     String endpoint,
     String method,
     Map<String, dynamic> payload,
+    SyncType type,
   ) async {
     await LocalSyncDB.instance.insertQueue(
       SyncItem(
         endpoint: endpoint,
         method: method,
         payload: payload,
+        type: type,
         createdAt: DateTime.now().toIso8601String(),
       ),
     );

@@ -17,7 +17,7 @@ class CustomTextComponent<T> extends StatefulWidget {
   final List<DropdownMenuItem<T>>? dropdownItems; // Items for dropdown
   final T? dropdownValue; // Currently selected dropdown value
   final Function(T?)? onDropdownChanged; // Callback for dropdown changes
-
+  final bool? readOnly;
   const CustomTextComponent({
     super.key,
     this.controller,
@@ -31,6 +31,7 @@ class CustomTextComponent<T> extends StatefulWidget {
     this.dropdownItems,
     this.dropdownValue,
     this.onDropdownChanged,
+    this.readOnly,
   });
 
   @override
@@ -49,7 +50,9 @@ class _CustomTextComponentState<T> extends State<CustomTextComponent<T>> {
         value: widget.dropdownValue,
         items: widget.dropdownItems,
         onChanged: widget.onDropdownChanged,
+
         decoration: InputDecoration(
+          enabled: widget.readOnly == true ? false : true,
           hintText: widget.hint,
           hintStyle: TextStyle(color: ColorsHelper.hint),
           prefixIcon: widget.icon,
@@ -74,6 +77,7 @@ class _CustomTextComponentState<T> extends State<CustomTextComponent<T>> {
         onChanged: widget.onChange,
         obscureText: widget.isPassword ? _obscureText : false,
         decoration: InputDecoration(
+          enabled: widget.readOnly == true ? false : true,
           hintText: widget.hint,
           hintStyle: TextStyle(color: ColorsHelper.hint),
           prefixIcon: widget.icon,

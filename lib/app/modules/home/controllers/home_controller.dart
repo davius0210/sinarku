@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
@@ -10,6 +11,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:persistent_bottom_nav_bar_v2/persistent_bottom_nav_bar_v2.dart';
 import 'package:sinarku/helper/custom_toast_helper.dart';
 import 'package:sinarku/helper/network_helper.dart';
+import 'package:sinarku/helper/sync_helper.dart';
 
 class LocationAddress {
   final String? provinsi;
@@ -37,6 +39,7 @@ class HomeController extends GetxController {
   //TODO: Implement HomeController
   final networkHelper = NetworkHelper();
   final RxDouble heading = 0.0.obs;
+  final RxDouble CurrentHeading = 0.0.obs;
   StreamSubscription? _compassSub;
   final isOnline = false.obs;
   final isProses = false.obs;
@@ -52,8 +55,14 @@ class HomeController extends GetxController {
   var dataMap = {}.obs;
   var address = Rxn<LocationAddress>();
   var isLoadingAddress = false.obs;
+  Rx<List<Map<String, dynamic>>> queueMap = Rx([]);
   void updateCenterInfo() {
     currentCenter.value = mapController.camera.center;
+  }
+
+  getAllQueue() async {
+    final result = await LocalSyncDB.instance.getAllQueue(SyncType.toponim);
+    queueMap.value = result;
   }
 
   Rx<bool> toponimSekitar = Rx(false);
@@ -98,6 +107,7 @@ class HomeController extends GetxController {
       print('📡 Status koneksi: ${status ? 'Online' : 'Offline'}');
     });
     initLocation();
+    getAllQueue();
   }
 
   Future<void> initLocation() async {
@@ -128,10 +138,21 @@ class HomeController extends GetxController {
     currentLocation.value = LatLng(position.latitude, position.longitude);
     currentPosition.value = position;
 
-    mapController.move(currentCenter.value!, 17);
-
     isLoadingLocation.value = false;
     fetchLocationInfo(currentCenter.value!);
+    getAllQueue();
+    Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 2,
+      ),
+    ).listen((Position position) {
+      CurrentHeading.value = position.heading;
+      currentCenter.value = LatLng(position.latitude, position.longitude);
+      currentLocation.value = LatLng(position.latitude, position.longitude);
+      currentPosition.value = position;
+      mapController.move(currentCenter.value!, 17);
+    });
   }
 
   @override

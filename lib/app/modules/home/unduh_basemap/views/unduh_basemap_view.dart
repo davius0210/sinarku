@@ -8,6 +8,8 @@ import 'package:latlong2/latlong.dart';
 import 'package:sinarku/app/modules/home/unduh_basemap/controllers/unduh_basemap_controller.dart';
 import 'package:sinarku/components/custom_button_component.dart';
 import 'package:sinarku/helper/colors_helper.dart';
+import 'package:flutter_map_dragmarker/flutter_map_dragmarker.dart';
+import 'package:flutter_map_line_editor/flutter_map_line_editor.dart';
 
 // Menggunakan GetView<T> agar dapat mengakses controller secara langsung
 class UnduhBasemapView extends GetView<UnduhBasemapController> {
@@ -31,9 +33,23 @@ class UnduhBasemapView extends GetView<UnduhBasemapController> {
                   maxZoom: 18,
                 ),
                 Obx(() => PolygonLayer(polygons: controller.polygons.value)),
+
+                // PolylineLayer(polylines: controller.polyLines),
+                Obx(
+                  () => controller.polyEditor.value != null
+                      ? DragMarkers(
+                          markers: controller.polyEditor.value!.edit() ?? [],
+                        )
+                      : SizedBox(),
+                ),
               ],
               options: MapOptions(
                 initialCenter: LatLng(-6.2088, 106.8456),
+                onTap: (_, ll) {
+                  controller.polyEditor.value?.add([
+                    LatLng(-6.2088, 106.8456),
+                  ], ll);
+                },
                 onMapEvent: (event) {
                   if (event is MapEventTap) {
                     if (controller.editButton.value) {

@@ -13,7 +13,6 @@ class ToponimView extends GetView<ToponimController> {
   @override
   Widget build(BuildContext context) {
     final address = Get.arguments;
-    print(address);
     return Scaffold(
       appBar: AppBar(title: Text('Rincian Data Nama Rupabumi')),
       body: SafeArea(
@@ -28,11 +27,18 @@ class ToponimView extends GetView<ToponimController> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _lokasiCard(address),
+                    Obx(() => _lokasiCard(address)),
 
                     const SizedBox(height: 16),
                     // _fotoPreview(),
-                    ImagePickerGridComponent(),
+                    ImagePickerGridComponent(
+                      value: [],
+
+                      onChanged: (value) {
+                        controller.listImage.value = value;
+                        print(value);
+                      },
+                    ),
                     const SizedBox(height: 16),
                     CustomTextComponent(
                       controller: controller.idRupabumi,
@@ -119,9 +125,10 @@ class ToponimView extends GetView<ToponimController> {
             Padding(
               padding: const EdgeInsets.all(16),
               child: CustomButtonComponent(
+                loadingText: "Please Wait ...",
                 width: double.infinity,
                 title: "Simpan Data",
-                onPressed: () => controller.simpanData(),
+                onPressed: () => controller.simpanData(context),
               ),
             ),
           ],
@@ -143,32 +150,35 @@ class ToponimView extends GetView<ToponimController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Koordinat: ${address['lat']}, ${address['lon']}"),
-          Text("Arah Pengambilan Foto: ${address['heading']} "),
-          const SizedBox(height: 4),
           Text(
-            "Provinsi: ${(address['address']['province'] ?? address['address']['state']) ?? '-'}",
+            "Koordinat: ${address['lat']}, ${address['lon']}",
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          Text(
-            "Kabupaten/Kota: ${(address['address']['city'] ?? address['address']['town'] ?? address['address']['village'] ?? address['address']['municipality']) ?? '-'}",
-          ),
-          Text(
-            "Kecamatan: ${(address['address']['borough'] ?? address['address']['county'] ?? address['address']['district']) ?? '-'}",
-          ),
-          Text(
-            "Desa/Kelurahan: ${(address['address']['suburb'] ?? address['address']['neighbourhood'] ?? address['address']['residential']) ?? '-'}",
-          ),
+          Text("Arah Pengambilan Foto: ${address['heading']}°"),
+          const Divider(),
+
+          // Input Fields
+          _buildEditableField("Provinsi", controller.provinsiController),
+          _buildEditableField("Kabupaten/Kota", controller.kabupatenController),
+          _buildEditableField("Kecamatan", controller.kecamatanController),
+          _buildEditableField("Desa/Kelurahan", controller.desaController),
+
+          const SizedBox(height: 10),
           Align(
             alignment: Alignment.topRight,
-            child: TextButton(
-              onPressed: () {},
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text("Edit"),
-                  SizedBox(width: 4),
-                  Icon(Icons.edit, size: 14),
-                ],
+            child: CustomButtonComponent(
+              onPressed: () {
+                controller.isEditing.value = !controller.isEditing.value;
+                if (controller.isEditing.value) {
+                  // Aksi Simpan: Di sini Anda bisa memproses data yang diedit
+                  print("Data Disimpan: ${controller.provinsiController.text}");
+                }
+              },
+              title: controller.isEditing.value ? "Simpan" : "Edit",
+              icon: Icon(
+                controller.isEditing.value ? Icons.save : Icons.edit,
+                size: 14,
+                color: Colors.white,
               ),
             ),
           ),
@@ -177,22 +187,33 @@ class ToponimView extends GetView<ToponimController> {
     );
   }
 
-  Widget _fotoPreview() {
-    return Obx(
-      () => Column(
+  // Helper widget untuk baris input
+  Widget _buildEditableField(String label, TextEditingController ctrl) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("Foto *", style: TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.network(
-              controller.imagePreview.value,
-              height: 200,
-              fit: BoxFit.cover,
-              width: double.infinity,
-            ),
+          Text(
+            "$label:",
+            style: const TextStyle(fontSize: 12, color: Colors.grey),
           ),
+          controller.isEditing.value
+              ? SizedBox(
+                  height: 40,
+                  child: TextField(
+                    controller: ctrl,
+                    style: const TextStyle(fontSize: 14),
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      contentPadding: EdgeInsets.symmetric(vertical: 8),
+                    ),
+                  ),
+                )
+              : Text(
+                  ctrl.text.isEmpty ? "-" : ctrl.text,
+                  style: const TextStyle(fontSize: 14),
+                ),
         ],
       ),
     );

@@ -49,8 +49,8 @@ class _ImagePickerGridComponentState extends State<ImagePickerGridComponent> {
     }
   }
 
-  Future<void> _pickImage() async {
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+  Future<void> _pickImage(ImageSource source) async {
+    final pickedFile = await picker.pickImage(source: source);
     if (pickedFile != null) {
       final file = File(pickedFile.path);
       if (await file.length() <= 5 * 1024 * 1024) {
@@ -71,6 +71,62 @@ class _ImagePickerGridComponentState extends State<ImagePickerGridComponent> {
       }
     }
   }
+
+  void _showPickOptions() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Kamera'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Galeri'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.gallery);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // Future<void> _pickImage() async {
+  //   final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+  //   if (pickedFile != null) {
+  //     final file = File(pickedFile.path);
+  //     if (await file.length() <= 5 * 1024 * 1024) {
+  //       setState(() {
+  //         if (widget.isSingleFile) {
+  //           _images
+  //             ..clear()
+  //             ..add(file);
+  //         } else {
+  //           _images.add(file);
+  //         }
+  //       });
+  //       _emitChanges();
+  //     } else {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         const SnackBar(content: Text('Ukuran gambar maksimal 5MB')),
+  //       );
+  //     }
+  //   }
+  // }
 
   void _removeImage(int index) {
     setState(() {
@@ -103,7 +159,7 @@ class _ImagePickerGridComponentState extends State<ImagePickerGridComponent> {
       // Tombol add
       if (!widget.isSingleFile || (_images.isEmpty && _urls.isEmpty))
         GestureDetector(
-          onTap: _pickImage,
+          onTap: _showPickOptions,
           child: Container(
             width: 78,
             height: 78,

@@ -19,6 +19,7 @@ abstract class Routes {
   static const SIGNUP = _Paths.SIGNUP;
   static const MAPSCREEN = _Paths.HOME + _Paths.MAPSCREEN;
   static const UNDUH_BASEMAP = _Paths.HOME + _Paths.UNDUH_BASEMAP;
+  static const DETAIL_TOPONIM = _Paths.HOME + _Paths.DETAIL_TOPONIM;
 }
 
 abstract class _Paths {
@@ -37,4 +38,5 @@ abstract class _Paths {
   static const SIGNUP = '/signup';
   static const MAPSCREEN = '/mapscreen';
   static const UNDUH_BASEMAP = '/unduh-basemap';
+  static const DETAIL_TOPONIM = '/detail-toponim';
 }

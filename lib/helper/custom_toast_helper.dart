@@ -12,6 +12,7 @@ class ToastHelper {
     bool isConfirm = false,
     String yesLabel = 'Yes',
     String noLabel = 'No',
+    Widget? icon,
     ValueChanged<bool>? onConfirm, // true = yes, false = no
   }) {
     // Hapus toast lama jika masih tampil
@@ -29,6 +30,7 @@ class ToastHelper {
         yesLabel: yesLabel,
         noLabel: noLabel,
         onConfirm: onConfirm,
+        icon: icon,
       ),
     );
 
@@ -57,6 +59,7 @@ class _ToastWidget extends StatefulWidget {
   final String yesLabel;
   final String noLabel;
   final ValueChanged<bool>? onConfirm;
+  final Widget? icon;
 
   const _ToastWidget({
     required this.message,
@@ -65,6 +68,7 @@ class _ToastWidget extends StatefulWidget {
     this.yesLabel = 'Yes',
     this.noLabel = 'No',
     this.onConfirm,
+    this.icon,
   });
 
   @override
@@ -126,11 +130,12 @@ class _ToastWidgetState extends State<_ToastWidget>
               children: [
                 Row(
                   children: [
-                    const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(),
-                    ),
+                    widget.icon ??
+                        SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(),
+                        ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(

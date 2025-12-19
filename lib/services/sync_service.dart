@@ -13,12 +13,13 @@ class SyncService {
   Future<void> sendOrQueue({
     required String endpoint,
     required String method,
+    required SyncType type,
     required Map<String, dynamic> payload,
   }) async {
     try {
       await _send(endpoint, method, payload);
     } catch (_) {
-      await _save(endpoint, method, payload);
+      await _save(endpoint, method, type, payload);
     }
   }
 
@@ -68,6 +69,7 @@ class SyncService {
   Future<void> _save(
     String endpoint,
     String method,
+    SyncType type,
     Map<String, dynamic> payload,
   ) async {
     await LocalSyncDB.instance.insertQueue(
@@ -75,6 +77,7 @@ class SyncService {
         endpoint: endpoint,
         method: method,
         payload: payload,
+        type: type,
         createdAt: DateTime.now().toIso8601String(),
       ),
     );
