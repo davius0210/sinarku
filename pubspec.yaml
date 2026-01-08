@@ -50,6 +50,8 @@ dependencies:
   geolocator: ^14.0.2
   sqflite: ^2.4.2
   flutter_map_line_editor: ^7.0.0
+  flutter_image_compress: ^2.4.0
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:

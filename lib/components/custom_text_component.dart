@@ -18,6 +18,7 @@ class CustomTextComponent<T> extends StatefulWidget {
   final T? dropdownValue; // Currently selected dropdown value
   final Function(T?)? onDropdownChanged; // Callback for dropdown changes
   final bool? readOnly;
+  final String? Function(dynamic)? validator;
   const CustomTextComponent({
     super.key,
     this.controller,
@@ -32,6 +33,7 @@ class CustomTextComponent<T> extends StatefulWidget {
     this.dropdownValue,
     this.onDropdownChanged,
     this.readOnly,
+    this.validator, // Inisialisasi validator
   });
 
   @override
@@ -50,62 +52,28 @@ class _CustomTextComponentState<T> extends State<CustomTextComponent<T>> {
         value: widget.dropdownValue,
         items: widget.dropdownItems,
         onChanged: widget.onDropdownChanged,
-
-        decoration: InputDecoration(
-          enabled: widget.readOnly == true ? false : true,
-          hintText: widget.hint,
-          hintStyle: TextStyle(color: ColorsHelper.hint),
-          prefixIcon: widget.icon,
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: ColorsHelper.border, width: 1),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: ColorsHelper.border, width: 2),
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: ColorsHelper.border),
-          ),
-        ),
+        validator: widget.validator, // Pasang validator di sini
+        decoration: _buildInputDecoration(),
       );
     } else {
-      inputWidget = TextField(
+      inputWidget = TextFormField(
+        // Ganti TextField ke TextFormField
         controller: widget.controller,
         keyboardType: widget.keyboardType,
         onChanged: widget.onChange,
+        readOnly: widget.readOnly ?? false,
         obscureText: widget.isPassword ? _obscureText : false,
-        decoration: InputDecoration(
-          enabled: widget.readOnly == true ? false : true,
-          hintText: widget.hint,
-          hintStyle: TextStyle(color: ColorsHelper.hint),
-          prefixIcon: widget.icon,
+        validator: widget.validator, // Pasang validator di sini
+        decoration: _buildInputDecoration().copyWith(
           suffixIcon: widget.isPassword
               ? IconButton(
                   icon: Icon(
                     _obscureText ? Icons.visibility_off : Icons.visibility,
                     color: ColorsHelper.border,
                   ),
-                  onPressed: () {
-                    setState(() {
-                      _obscureText = !_obscureText;
-                    });
-                  },
+                  onPressed: () => setState(() => _obscureText = !_obscureText),
                 )
               : null,
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: ColorsHelper.border, width: 1),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: ColorsHelper.border, width: 2),
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: ColorsHelper.border),
-          ),
         ),
       );
     }
@@ -123,6 +91,33 @@ class _CustomTextComponentState<T> extends State<CustomTextComponent<T>> {
           ),
         inputWidget,
       ],
+    );
+  }
+
+  // Helper agar kodingan dekorasi tidak duplikat
+  InputDecoration _buildInputDecoration() {
+    return InputDecoration(
+      hintText: widget.hint,
+      hintStyle: TextStyle(color: ColorsHelper.hint),
+      prefixIcon: widget.icon,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: ColorsHelper.border, width: 1),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: ColorsHelper.border, width: 2),
+      ),
+      errorBorder: OutlineInputBorder(
+        // Border saat validasi salah
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Colors.red, width: 1),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Colors.red, width: 2),
+      ),
     );
   }
 }

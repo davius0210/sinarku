@@ -4,9 +4,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sinarku/helper/colors_helper.dart';
+import 'package:path_provider/path_provider.dart' as path_provider;
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class ImagePickerGridComponent extends StatefulWidget {
-  final ValueChanged<List<String>>? onValue; // ✅ semua path (url + lokal)
+  final ValueChanged<String>? onValue; // ✅ semua path (url + lokal)
   final ValueChanged<List<String>>? onChanged; // ✅ trigger tiap ada perubahan
   final ValueChanged<int>? onDeleted; // ✅ callback khusus hapus url
   final bool isSingleFile;
@@ -51,25 +53,50 @@ class _ImagePickerGridComponentState extends State<ImagePickerGridComponent> {
 
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await picker.pickImage(source: source);
-    if (pickedFile != null) {
-      final file = File(pickedFile.path);
-      if (await file.length() <= 5 * 1024 * 1024) {
-        setState(() {
-          if (widget.isSingleFile) {
-            _images
-              ..clear()
-              ..add(file);
-          } else {
-            _images.add(file);
-          }
-        });
-        _emitChanges();
+    if (pickedFile == null) return;
+
+    File file = File(pickedFile.path);
+    int fileSize = await file.length();
+
+    if (fileSize > 5 * 1024 * 1024) {
+      final compressedFile = await _compressImage(file);
+      if (compressedFile != null) {
+        file = compressedFile;
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Ukuran gambar maksimal 5MB')),
-        );
+        return; // Gagal kompresi
       }
     }
+
+    setState(() {
+      if (widget.isSingleFile) {
+        _images
+          ..clear()
+          ..add(file);
+      } else {
+        _images.add(file);
+      }
+    });
+
+    // ✅ Panggil onValue hanya untuk path file yang baru saja diambil
+    widget.onValue?.call(file.path);
+
+    // ✅ Tetap panggil emit untuk update onChanged (list keseluruhan)
+    _emitChanges();
+  }
+
+  // Fungsi Helper untuk Kompresi
+  Future<File?> _compressImage(File file) async {
+    final tempDir = await path_provider.getTemporaryDirectory();
+    final targetPath =
+        '${tempDir.absolute.path}/temp_${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+    final result = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path,
+      targetPath,
+      quality: 50, // Menurunkan kualitas ke 70%
+    );
+
+    return result != null ? File(result.path) : null;
   }
 
   void _showPickOptions() {
@@ -149,7 +176,6 @@ class _ImagePickerGridComponentState extends State<ImagePickerGridComponent> {
       ..._images.map((f) => f.path),
     ];
 
-    widget.onValue?.call(allPaths);
     widget.onChanged?.call(allPaths); // ✅ selalu kirim list<String>
   }
 

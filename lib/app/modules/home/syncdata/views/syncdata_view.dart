@@ -50,7 +50,6 @@ class SyncdataView extends GetView<SyncdataController> {
   Widget _pageDaftarData() {
     return Column(
       children: [
-        _buildSummaryCards(),
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           child: Row(
@@ -118,56 +117,85 @@ class SyncdataView extends GetView<SyncdataController> {
 
   // Main List / Table
   Widget _buildSyncTable() {
-    return ListView.builder(
-      itemCount: 10,
-      padding: const EdgeInsets.symmetric(horizontal: 15),
-      itemBuilder: (context, index) {
-        bool isSynced = index % 3 == 0; // Simulasi status
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(15),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.grey.withOpacity(0.1)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.02),
-                blurRadius: 10,
-                offset: const Offset(0, 5),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              // Icon Method
-              Icon(Icons.location_on, color: Colors.blue),
-              const SizedBox(width: 15),
-              // Endpoint & Payload Info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Data Toponim $index",
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "Type: LocationData • 12 Dec, 14:20",
-                      style: TextStyle(color: Colors.grey[500], fontSize: 11),
+    return FutureBuilder(
+      // ✅ PENTING: Jika menggunakan GetX, sebaiknya fetch dilakukan di onInit controller.
+      // Jika tetap di sini, pastikan variabel future disimpan di state agar tidak re-fetch.
+      future: controller.fetchToponymData(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+
+        // ✅ Gunakan Obx agar jika ada perubahan data di list (setelah hapus/tambah), UI terupdate
+        return Obx(() {
+          final data = controller.dataToponym.value;
+
+          if (data.isEmpty) {
+            return CustomEmptyWidget(title: 'Tidak ada data toponim');
+          }
+
+          return ListView.builder(
+            shrinkWrap:
+                true, // Tambahkan jika berada dalam Column/Scrollview lain
+            itemCount: data.length,
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            itemBuilder: (context, index) {
+              final item = data[index];
+              // Simulasi status berdasarkan data asli jika ada, misal: item['is_synced']
+              bool isSynced = item['status'] == 'pembakuan' || index % 3 == 0;
+
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(15),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.grey.withOpacity(0.1)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.02),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
                     ),
                   ],
                 ),
-              ),
-              // Status Badge
-              _statusBadge(isSynced),
-            ],
-          ),
-        );
+                child: Row(
+                  children: [
+                    const Icon(Icons.location_on, color: Colors.blue),
+                    const SizedBox(width: 15),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "${item['map_name'] ?? 'Tanpa Nama'}", // Handle null safety
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            "${item['created_at'] ?? '-'}",
+                            style: TextStyle(
+                              color: Colors.grey[500],
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    _statusBadge(isSynced),
+                  ],
+                ),
+              );
+            },
+          );
+        });
       },
     );
   }

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +25,7 @@ import 'package:sinarku/helper/colors_helper.dart';
 import 'package:sinarku/helper/constant_helper.dart';
 import 'package:sinarku/helper/custom_toast_helper.dart';
 import 'package:sinarku/helper/function_helper.dart';
+import 'package:sinarku/helper/sync_helper.dart';
 
 import '../controllers/home_controller.dart';
 
@@ -40,24 +42,38 @@ class HomeView extends GetView<HomeController> {
               foregroundColor: Colors.white,
             ),
             SizedBox(width: 20),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Jimmy Andrian Davius',
-                  style: TextStyle(color: Colors.white, fontSize: 16),
-                ),
-                SizedBox(height: 5),
-                Text(
-                  'Pengguna Umum',
-                  style: TextStyle(color: Colors.white, fontSize: 12),
-                ),
-              ],
+            Obx(
+              () => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    controller.user.value?.name ?? '',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                  SizedBox(height: 5),
+                  // Text(
+                  //   controller.user.value?.userType.toString() ?? '',
+                  //   style: TextStyle(color: Colors.white, fontSize: 12),
+                  // ),
+                ],
+              ),
             ),
           ],
         ),
         centerTitle: false,
         actions: [
+          IconButton(
+            onPressed: () async {
+              controller.getAllQueue();
+            },
+            icon: const Icon(Icons.refresh),
+          ),
+          IconButton(
+            onPressed: () async {
+              LocalSyncDB.instance.deleteAllQueue();
+            },
+            icon: const Icon(Icons.delete),
+          ),
           Obx(
             () => StatusIndicator(
               size: 15,
@@ -73,7 +89,7 @@ class HomeView extends GetView<HomeController> {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
-              Get.offAllNamed('/login');
+              controller.logout();
             },
           ),
         ],
@@ -98,6 +114,7 @@ class HomeView extends GetView<HomeController> {
                     final center = controller.mapController.camera.center;
                     controller.currentCenter.value = center;
                     controller.fetchLocationInfo(center);
+                    controller.currentToponym.value = center;
                   }
                 },
                 onPositionChanged: (position, hasGesture) {},
@@ -118,41 +135,46 @@ class HomeView extends GetView<HomeController> {
 
                 Obx(() {
                   return MarkerLayer(
-                    markers: [
-                      Marker(
-                        point: controller.currentLocation.value!,
-                        width: 45,
-                        height: 45,
-                        // Gunakan bottomCenter agar koordinat GPS pas di titik PIN
-                        alignment: Alignment.center,
-                        child: GestureDetector(
-                          onPanUpdate: (details) {
-                            // optional: drag marker pakai screen delta
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(color: Colors.black26, blurRadius: 4),
-                              ],
-                            ),
-                            child: Transform.rotate(
-                              // Rotasi berdasarkan heading dari GPS
-                              angle:
-                                  controller.CurrentHeading.value *
-                                  (3.1415926535897932 / 180),
-                              child: const Icon(
-                                Icons
-                                    .navigation, // Icon ini berbentuk panah arah
-                                color: Colors.blue,
-                                size: 25,
+                    markers: controller.currentLocation.value != null
+                        ? [
+                            Marker(
+                              point: controller.currentLocation.value!,
+                              width: 45,
+                              height: 45,
+                              // Gunakan bottomCenter agar koordinat GPS pas di titik PIN
+                              alignment: Alignment.center,
+                              child: GestureDetector(
+                                onPanUpdate: (details) {
+                                  // optional: drag marker pakai screen delta
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black26,
+                                        blurRadius: 4,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Transform.rotate(
+                                    // Rotasi berdasarkan heading dari GPS
+                                    angle:
+                                        controller.CurrentHeading.value *
+                                        (3.1415926535897932 / 180),
+                                    child: const Icon(
+                                      Icons
+                                          .navigation, // Icon ini berbentuk panah arah
+                                      color: Colors.blue,
+                                      size: 25,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                      ),
-                    ],
+                          ]
+                        : [],
                   );
                 }),
                 Obx(() {
@@ -162,12 +184,14 @@ class HomeView extends GetView<HomeController> {
 
                   return MarkerLayer(
                     markers: controller.queueMap.value.map((e) {
-                      final _data = jsonDecode(e['payload'].toString());
-                      final _address = _data['alamat'];
-                      final coordinate = _data['koordinat'];
-                      print(coordinate);
+                      // final _data = jsonDecode(e['payload'].toString());
+                      final _data = e;
+                      //log(_data.toString());
                       return Marker(
-                        point: LatLng(coordinate['lat'], coordinate['lng']),
+                        point: LatLng(
+                          double.parse(_data['lat']),
+                          double.parse(_data['lng']),
+                        ),
                         // --- TAMBAHKAN WIDTH DAN HEIGHT DISINI ---
                         width: 300,
                         height: 300,
@@ -179,29 +203,33 @@ class HomeView extends GetView<HomeController> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Koordinat: ${coordinate['lat'].toStringAsFixed(2)}, ${coordinate['lng'].toStringAsFixed(2)}",
+                                "Koordinat: ${double.parse(_data['lat']).toStringAsFixed(2)}, ${double.parse(_data['lng']).toStringAsFixed(2)}",
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 11,
                                 ),
                               ),
                               const Divider(height: 10),
-                              Text(
-                                "Provinsi: ${_address['provinsi'] ?? '-'}",
-                                style: const TextStyle(fontSize: 10),
-                              ),
-                              Text(
-                                "Kota/Kab: ${_address['kabupaten_kota'] ?? '-'}",
-                                style: const TextStyle(fontSize: 10),
-                              ),
-                              Text(
-                                "Kec: ${_address['kecamatan'] ?? '-'}",
-                                style: const TextStyle(fontSize: 10),
-                              ),
-                              Text(
-                                "Kel/Desa: ${_address['desa_kelurahan'] ?? '-'}",
-                                style: const TextStyle(fontSize: 10),
-                              ),
+                              if (_data['province'] != null)
+                                Text(
+                                  "Provinsi: ${_data['province']['name'] ?? '-'}",
+                                  style: const TextStyle(fontSize: 10),
+                                ),
+                              if (_data['regency'] != null)
+                                Text(
+                                  "Kota/Kab: ${_data['regency']['name'] ?? '-'}",
+                                  style: const TextStyle(fontSize: 10),
+                                ),
+                              if (_data['district'] != null)
+                                Text(
+                                  "Kec: ${_data['district']['name'] ?? '-'}",
+                                  style: const TextStyle(fontSize: 10),
+                                ),
+                              if (_data['village'] != null)
+                                Text(
+                                  "Kel/Desa: ${_data['village']['name'] ?? '-'}",
+                                  style: const TextStyle(fontSize: 10),
+                                ),
                               const SizedBox(height: 6),
                             ],
                           ),
@@ -220,14 +248,14 @@ class HomeView extends GetView<HomeController> {
                 }),
                 Obx(() {
                   if (!controller.isRekamToponim.value ||
-                      controller.currentCenter.value == null) {
+                      controller.currentToponym.value == null) {
                     return const SizedBox();
                   }
 
                   return MarkerLayer(
                     markers: [
                       Marker(
-                        point: controller.currentCenter.value!,
+                        point: controller.currentToponym.value!,
                         width: 80,
                         height: 80,
                         alignment: Alignment.center,
@@ -268,54 +296,56 @@ class HomeView extends GetView<HomeController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.satellite_alt, color: Colors.white),
-                        SizedBox(width: 5),
-                        Text(
-                          'Satellite',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Icon(Icons.terrain, color: Colors.white),
-                        SizedBox(width: 5),
-                        Text(
-                          controller.currentPosition.value!.altitude
-                                  .toStringAsFixed(2) +
-                              ' m',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Icon(Icons.speed, color: Colors.white),
-                        SizedBox(width: 5),
-                        Text(
-                          controller.currentPosition.value!.speed
-                                  .toStringAsFixed(2) +
-                              ' km/h',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Icon(Icons.my_location, color: Colors.white),
-                        SizedBox(width: 5),
-                        Text(
-                          controller.currentPosition.value!.accuracy
-                                  .toStringAsFixed(2) +
-                              ' m',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ],
-                    ),
-                  ],
+                  children: controller.currentPosition.value != null
+                      ? [
+                          Row(
+                            children: [
+                              Icon(Icons.satellite_alt, color: Colors.white),
+                              SizedBox(width: 5),
+                              Text(
+                                'Satellite',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Icon(Icons.terrain, color: Colors.white),
+                              SizedBox(width: 5),
+                              Text(
+                                controller.currentPosition.value!.altitude
+                                        .toStringAsFixed(2) +
+                                    ' m',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Icon(Icons.speed, color: Colors.white),
+                              SizedBox(width: 5),
+                              Text(
+                                controller.currentPosition.value!.speed
+                                        .toStringAsFixed(2) +
+                                    ' km/h',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Icon(Icons.my_location, color: Colors.white),
+                              SizedBox(width: 5),
+                              Text(
+                                controller.currentPosition.value!.accuracy
+                                        .toStringAsFixed(2) +
+                                    ' m',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        ]
+                      : [],
                 ),
               ),
             ),
@@ -825,7 +855,7 @@ class HomeView extends GetView<HomeController> {
           Obx(
             () => (controller.isRekamToponim.value)
                 ? Positioned(
-                    top: -260,
+                    top: -160,
                     bottom: 0,
                     left: 0,
                     right: 0,
@@ -852,7 +882,7 @@ class HomeView extends GetView<HomeController> {
 
   Widget infoPopup() {
     return Obx(() {
-      if (controller.currentCenter.value == null) return const SizedBox();
+      if (controller.currentToponym.value == null) return const SizedBox();
       return PopupWithArrow(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -863,34 +893,33 @@ class HomeView extends GetView<HomeController> {
               children: [
                 Text(
                   "Koordinat: "
-                  "${controller.currentCenter.value!.latitude.toStringAsFixed(6)}, "
-                  "${controller.currentCenter.value!.longitude.toStringAsFixed(6)}",
+                  "${controller.currentToponym.value!.latitude.toStringAsFixed(6)}, "
+                  "${controller.currentToponym.value!.longitude.toStringAsFixed(6)}",
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 6),
 
                 // 🔄 Jika loading alamat
-                if (controller.isLoadingAddress.value)
-                  const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(4),
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  ),
+                // if (controller.isLoadingAddress.value)
+                //   const Center(
+                //     child: Padding(
+                //       padding: EdgeInsets.all(4),
+                //       child: CircularProgressIndicator(strokeWidth: 2),
+                //     ),
+                //   ),
 
-                // 📍 Menampilkan alamat jika sudah ada
-                if (controller.address.value != null &&
-                    !controller.isLoadingAddress.value) ...[
-                  Text(
-                    "Provinsi: ${controller.address.value!.provinsi ?? '-'}",
-                  ),
-                  Text("Kota/Kab: ${controller.address.value!.kota ?? '-'}"),
-                  Text("Kec: ${controller.address.value!.kecamatan ?? '-'}"),
-                  Text(
-                    "Kel/Desa: ${controller.address.value!.kelurahan ?? '-'}",
-                  ),
-                ],
-
+                // // 📍 Menampilkan alamat jika sudah ada
+                // if (controller.address.value != null &&
+                //     !controller.isLoadingAddress.value) ...[
+                //   Text(
+                //     "Provinsi: ${controller.address.value!.provinsi ?? '-'}",
+                //   ),
+                //   Text("Kota/Kab: ${controller.address.value!.kota ?? '-'}"),
+                //   Text("Kec: ${controller.address.value!.kecamatan ?? '-'}"),
+                //   Text(
+                //     "Kel/Desa: ${controller.address.value!.kelurahan ?? '-'}",
+                //   ),
+                // ],
                 const SizedBox(height: 6),
                 CustomButtonComponent(
                   width: double.infinity,

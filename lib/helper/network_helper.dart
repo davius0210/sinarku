@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:sinarku/helper/dio_helper.dart';
+import 'package:sinarku/data/dio_client.dart';
 import 'package:sinarku/helper/sync_helper.dart';
 
 class NetworkHelper {
@@ -21,7 +21,7 @@ class NetworkHelper {
       onStatusChange(isOnline);
       // Ini untuk nge sync data yang belum berhasil dikirim saat online
       if (results != ConnectivityResult.none) {
-        final _dio = DioHelper().dio;
+        final _dio = DioClient().dio;
         SyncService(_dio).syncPending();
       }
     });
