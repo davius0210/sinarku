@@ -114,11 +114,14 @@ class HomeController extends GetxController {
     // for (var element in result) {
     //   log(element['payload'].toString());
     // }
+    final position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.bestForNavigation,
+    );
     final result = await DioClient().dio.get(
       ApiHelper.api['toponym/nearby'].toString(),
       queryParameters: {
-        'lat': currentPosition.value?.latitude,
-        'lng': currentPosition.value?.longitude,
+        'lat': position.latitude,
+        'lng': position.longitude,
         'radius': 500000,
       },
     );

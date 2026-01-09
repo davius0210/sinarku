@@ -186,12 +186,9 @@ class HomeView extends GetView<HomeController> {
                     markers: controller.queueMap.value.map((e) {
                       // final _data = jsonDecode(e['payload'].toString());
                       final _data = e;
-                      //log(_data.toString());
+                      log(_data['lat'].toString());
                       return Marker(
-                        point: LatLng(
-                          double.parse(_data['lat']),
-                          double.parse(_data['lng']),
-                        ),
+                        point: LatLng(_data['lat'], _data['lng']),
                         // --- TAMBAHKAN WIDTH DAN HEIGHT DISINI ---
                         width: 300,
                         height: 300,
@@ -203,7 +200,7 @@ class HomeView extends GetView<HomeController> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Koordinat: ${double.parse(_data['lat']).toStringAsFixed(2)}, ${double.parse(_data['lng']).toStringAsFixed(2)}",
+                                "Koordinat: ${_data['lat'].toStringAsFixed(2)}, ${_data['lng'].toStringAsFixed(2)}",
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 11,
@@ -212,22 +209,22 @@ class HomeView extends GetView<HomeController> {
                               const Divider(height: 10),
                               if (_data['province'] != null)
                                 Text(
-                                  "Provinsi: ${_data['province']['name'] ?? '-'}",
+                                  "Provinsi: ${_data['province'] ?? '-'}",
                                   style: const TextStyle(fontSize: 10),
                                 ),
                               if (_data['regency'] != null)
                                 Text(
-                                  "Kota/Kab: ${_data['regency']['name'] ?? '-'}",
+                                  "Kota/Kab: ${_data['regency'] ?? '-'}",
                                   style: const TextStyle(fontSize: 10),
                                 ),
                               if (_data['district'] != null)
                                 Text(
-                                  "Kec: ${_data['district']['name'] ?? '-'}",
+                                  "Kec: ${_data['district'] ?? '-'}",
                                   style: const TextStyle(fontSize: 10),
                                 ),
                               if (_data['village'] != null)
                                 Text(
-                                  "Kel/Desa: ${_data['village']['name'] ?? '-'}",
+                                  "Kel/Desa: ${_data['village'] ?? '-'}",
                                   style: const TextStyle(fontSize: 10),
                                 ),
                               const SizedBox(height: 6),
